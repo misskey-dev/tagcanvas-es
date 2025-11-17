@@ -1,0 +1,20 @@
+{
+  "name": "@misskey-dev/tagcanvas-es",
+  "version": "2.11.0",
+  "type": "module",
+  "description": "HTML5 canvas-based tag cloud (Modernized ES module version of TagCanvas)",
+  "main": "./dist/tagcanvas.js",
+  "types": "./dist/tagcanvas.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "contributors": [
+    "Graham Breach <graham@goat1000.com>",
+    "Misskey Project"
+  ],
+  "license": "LGPL-3.0-only",
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

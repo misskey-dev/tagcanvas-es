@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "outDir": "./dist/",
+    "removeComments": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "lib": ["DOM", "ESNext"]
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+  ]
+}
