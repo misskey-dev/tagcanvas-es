@@ -5,116 +5,20 @@
  * The project is distributed under LGPL-3.0-only (see repository LICENSE).
  */
 
-export interface TagCanvasOptions {
-	z1?: number;
-	z2?: number;
-	z0?: number;
-	freezeActive?: boolean;
-	freezeDecel?: boolean;
-	activeCursor?: string;
-	pulsateTo?: number;
-	pulsateTime?: number;
-	reverse?: boolean;
-	depth?: number;
-	maxSpeed?: number;
-	minSpeed?: number;
-	decel?: number;
-	interval?: number;
-	minBrightness?: number;
-	maxBrightness?: number;
-	outlineColour?: string;
-	outlineThickness?: number;
-	outlineOffset?: number;
-	outlineMethod?: string;
-	outlineRadius?: number;
-	textColour?: string;
-	textHeight?: number;
-	textFont?: string;
-	shadow?: string;
-	shadowBlur?: number;
-	shadowOffset?: [number, number];
-	initial?: [number, number] | null;
-	hideTags?: boolean;
-	zoom?: number;
-	weight?: boolean;
-	weightMode?: string;
-	weightFrom?: string | null;
-	weightSize?: number;
-	weightSizeMin?: number | null;
-	weightSizeMax?: number | null;
-	weightGradient?: any;
-	txtOpt?: boolean;
-	txtScale?: number;
-	frontSelect?: boolean;
-	wheelZoom?: boolean;
-	zoomMin?: number;
-	zoomMax?: number;
-	zoomStep?: number;
-	shape?: any;
-	lock?: any;
-	tooltip?: any;
-	tooltipDelay?: number;
-	tooltipClass?: string;
-	radiusX?: number;
-	radiusY?: number;
-	radiusZ?: number;
-	stretchX?: number;
-	stretchY?: number;
-	offsetX?: number;
-	offsetY?: number;
-	shuffleTags?: boolean;
-	noSelect?: boolean;
-	noMouse?: boolean;
-	imageScale?: number;
-	paused?: boolean;
-	dragControl?: boolean;
-	dragThreshold?: number;
-	centreFunc?: (
-		c: CanvasRenderingContext2D,
-		w: number,
-		h: number,
-		cx: number,
-		cy: number,
-	) => void;
-	splitWidth?: number;
-	animTiming?: string | ((t: number, t0: number) => number);
-	clickToFront?: any;
-	fadeIn?: number;
-	padding?: number;
-	bgColour?: string | null;
-	bgRadius?: number;
-	bgOutline?: string | null;
-	bgOutlineThickness?: number;
-	outlineIncrease?: number;
-	textAlign?: string;
-	textVAlign?: string;
-	imageMode?: string | null;
-	imagePosition?: string | null;
-	imagePadding?: number;
-	imageAlign?: string;
-	imageVAlign?: string;
-	noTagsMessage?: boolean;
-	centreImage?: string | null;
-	pinchZoom?: boolean;
-	repeatTags?: number;
-	minTags?: number;
-	imageRadius?: any;
-	scrollPause?: any;
-	outlineDash?: number;
-	outlineDashSpace?: number;
-	outlineDashSpeed?: number;
-	activeAudio?: any;
-	audioVolume?: number;
-	audioIcon?: any;
-	audioIconSize?: number;
-	audioIconThickness?: number;
-	audioIconDark?: any;
-	altImage?: any;
-}
+import { defaultTagCanvasOptions } from '@/tagcanvas/options';
+import { Clamp, Defined, IsObject, Nop, Shuffle, SortList, TimeNow } from '@/tagcanvas/util';
+import { MakeVector, Matrix, Project, Vector } from '@/tagcanvas/geometry';
+import {
+	PointsOnCylinderH,
+	PointsOnCylinderV,
+	PointsOnRingH,
+	PointsOnRingV,
+	PointsOnSphere,
+} from '@/tagcanvas/shapes';
+import type { TagCanvasOptions, ThreeDCoord, XY, XYZ } from '@/tagcanvas/types';
 
-type ThreeDCoord = [x: number, y: number, z: number];
-type XY = { x: number; y: number };
-type XYZ = { x: number; y: number; z: number };
+export type { TagCanvasOptions } from '@/tagcanvas/types';
+export { defaultTagCanvasOptions };
 
 const abs = Math.abs;
 const sin = Math.sin;
@@ -168,43 +72,6 @@ const hexlookup2: Record<string, string> = (() => {
 })();
 
 const hexlookup3: Record<string, string> = {};
-
-function Defined<T>(d: T): d is Exclude<T, undefined> {
-	return typeof d !== 'undefined';
-}
-
-function IsObject(o: unknown): o is Record<string, any> {
-	return typeof o === 'object' && o !== null;
-}
-
-function Clamp(v: number, mn: number, mx: number) {
-	return Number.isNaN(v) ? mx : min(mx, max(mn, v));
-}
-
-function Nop() {
-	return false;
-}
-
-function TimeNow() {
-	return Date.now();
-}
-
-function SortList<T>(l: T[], f: (a: T, b: T) => number) {
-	const nl = l.slice();
-	nl.sort(f);
-	return nl;
-}
-
-function Shuffle<T>(a: T[]) {
-	let i = a.length - 1;
-	while (i) {
-		const p = ~~(Math.random() * i);
-		const t = a[i];
-		a[i] = a[p];
-		a[p] = t;
-		--i;
-	}
-}
 
 function SetupAudio(): AudioContext | undefined {
 	// @ts-expect-error: webkitAudioContext exists on some browsers
@@ -277,173 +144,6 @@ function AudioIcon(
 	}
 	c.closePath();
 	c.stroke();
-}
-
-class Vector {
-	constructor(
-		public x: number,
-		public y: number,
-		public z: number,
-	) {}
-
-	length() {
-		return sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-	}
-
-	dot(v: Vector) {
-		return this.x * v.x + this.y * v.y + this.z * v.z;
-	}
-
-	cross(v: Vector) {
-		const x = this.y * v.z - this.z * v.y;
-		const y = this.z * v.x - this.x * v.z;
-		const z = this.x * v.y - this.y * v.x;
-		return new Vector(x, y, z);
-	}
-
-	angle(v: Vector) {
-		const dotv = this.dot(v);
-		if (dotv === 0) return Math.PI / 2;
-		const ac = dotv / (this.length() * v.length());
-		if (ac >= 1) return 0;
-		if (ac <= -1) return Math.PI;
-		return Math.acos(ac);
-	}
-
-	unit() {
-		const l = this.length();
-		return new Vector(this.x / l, this.y / l, this.z / l);
-	}
-}
-
-function MakeVector(lg: number, lt: number) {
-	lt = (lt * Math.PI) / 180;
-	lg = (lg * Math.PI) / 180;
-	const x = sin(lg) * cos(lt);
-	const y = -sin(lt);
-	const z = -cos(lg) * cos(lt);
-	return new Vector(x, y, z);
-}
-
-class Matrix {
-	// row-major 3x3
-	private m: [[number, number, number], [number, number, number], [number, number, number]];
-
-	constructor(a: number[]) {
-		this.m = [
-			[a[0], a[1], a[2]],
-			[a[3], a[4], a[5]],
-			[a[6], a[7], a[8]],
-		];
-	}
-
-	static Identity() {
-		return new Matrix([1, 0, 0, 0, 1, 0, 0, 0, 1]);
-	}
-
-	static Rotation(angle: number, u: Vector) {
-		const sina = sin(angle);
-		const cosa = cos(angle);
-		const mcos = 1 - cosa;
-		return new Matrix([
-			cosa + pow(u.x, 2) * mcos,
-			u.x * u.y * mcos - u.z * sina,
-			u.x * u.z * mcos + u.y * sina,
-			u.y * u.x * mcos + u.z * sina,
-			cosa + pow(u.y, 2) * mcos,
-			u.y * u.z * mcos - u.x * sina,
-			u.z * u.x * mcos - u.y * sina,
-			u.z * u.y * mcos + u.x * sina,
-			cosa + pow(u.z, 2) * mcos,
-		]);
-	}
-
-	mul(m: Matrix | number) {
-		const a: number[] = [];
-		if (typeof m === 'number') {
-			for (let i = 0; i < 3; ++i) {
-				for (let j = 0; j < 3; ++j) {
-					a.push(this.m[i][j] * m);
-				}
-			}
-			return new Matrix(a);
-		}
-		for (let i = 0; i < 3; ++i) {
-			for (let j = 0; j < 3; ++j) {
-				a.push(
-					this.m[i][0] * m.m[0][j] +
-						this.m[i][1] * m.m[1][j] +
-						this.m[i][2] * m.m[2][j],
-				);
-			}
-		}
-		return new Matrix(a);
-	}
-
-	xform(p: Vector): XYZ {
-		const x = p.x,
-			y = p.y,
-			z = p.z;
-		return {
-			x: x * this.m[0][0] + y * this.m[1][0] + z * this.m[2][0],
-			y: x * this.m[0][1] + y * this.m[1][1] + z * this.m[2][1],
-			z: x * this.m[0][2] + y * this.m[1][2] + z * this.m[2][2],
-		};
-	}
-}
-
-function PointsOnSphere(n: number, xr: number, yr: number, zr: number, magic?: any): ThreeDCoord[] {
-	const pts: ThreeDCoord[] = [];
-	const off = 2 / n;
-	const inc = Math.PI * (3 - sqrt(5) + (parseFloat(magic) ? parseFloat(magic) : 0));
-	for (let i = 0; i < n; ++i) {
-		const y = i * off - 1 + off / 2;
-		const r = sqrt(1 - y * y);
-		const phi = i * inc;
-		pts.push([cos(phi) * r * xr, y * yr, sin(phi) * r * zr]);
-	}
-	return pts;
-}
-
-function Cylinder(n: number, o: number, xr: number, yr: number, zr: number, magic?: any): ThreeDCoord[] {
-	const pts: ThreeDCoord[] = [];
-	const off = 2 / n;
-	const inc = Math.PI * (3 - sqrt(5) + (parseFloat(magic) ? parseFloat(magic) : 0));
-	for (let i = 0; i < n; ++i) {
-		const j = i * off - 1 + off / 2;
-		const phi = i * inc;
-		const k = cos(phi);
-		const l = sin(phi);
-		pts.push(o ? [j * xr, k * yr, l * zr] : [k * xr, j * yr, l * zr]);
-	}
-	return pts;
-}
-
-function Ring(o: number, n: number, xr: number, yr: number, zr: number, j: number): ThreeDCoord[] {
-	const pts: ThreeDCoord[] = [];
-	const inc = (Math.PI * 2) / n;
-	for (let i = 0; i < n; ++i) {
-		const phi = i * inc;
-		const k = cos(phi);
-		const l = sin(phi);
-		pts.push(o ? [j * xr, k * yr, l * zr] : [k * xr, j * yr, l * zr]);
-	}
-	return pts;
-}
-
-function PointsOnCylinderV(n: number, xr: number, yr: number, zr: number, m?: any) {
-	return Cylinder(n, 0, xr, yr, zr, m);
-}
-function PointsOnCylinderH(n: number, xr: number, yr: number, zr: number, m?: any) {
-	return Cylinder(n, 1, xr, yr, zr, m);
-}
-function PointsOnRingV(n: number, xr: number, yr: number, zr: number, offset?: any) {
-	offset = Number.isNaN(offset) ? 0 : offset * 1;
-	return Ring(0, n, xr, yr, zr, offset);
-}
-function PointsOnRingH(n: number, xr: number, yr: number, zr: number, offset?: any) {
-	offset = Number.isNaN(offset) ? 0 : offset * 1;
-	return Ring(1, n, xr, yr, zr, offset);
 }
 
 function CentreImage(t: any) {
@@ -1227,16 +927,6 @@ function NextFrameTimeout(iv: number) {
 	setTimeout(DrawCanvas, iv);
 }
 
-function Project(tc: any, p1: any, sx: number, sy: number) {
-	const m = (tc.radius * tc.z1) / (tc.z1 + tc.z2 + p1.z);
-	return {
-		x: p1.x * m * sx,
-		y: p1.y * m * sy,
-		z: p1.z,
-		w: (tc.z1 - p1.z) / tc.z2,
-	};
-}
-
 class TextSplitter {
 	br = 0;
 	line: string[] = [];
@@ -1905,108 +1595,6 @@ class Tag {
 		return false;
 	}
 }
-
-export const defaultTagCanvasOptions: Required<TagCanvasOptions> = {
-	z1: 20000,
-	z2: 20000,
-	z0: 0.0002,
-	freezeActive: false,
-	freezeDecel: false,
-	activeCursor: 'pointer',
-	pulsateTo: 1,
-	pulsateTime: 3,
-	reverse: false,
-	depth: 0.5,
-	maxSpeed: 0.05,
-	minSpeed: 0,
-	decel: 0.95,
-	interval: 20,
-	minBrightness: 0.1,
-	maxBrightness: 1,
-	outlineColour: '#ffff99',
-	outlineThickness: 2,
-	outlineOffset: 5,
-	outlineMethod: 'outline',
-	outlineRadius: 0,
-	textColour: '#ff99ff',
-	textHeight: 15,
-	textFont: 'Helvetica, Arial, sans-serif',
-	shadow: '#000',
-	shadowBlur: 0,
-	shadowOffset: [0, 0],
-	initial: null,
-	hideTags: true,
-	zoom: 1,
-	weight: false,
-	weightMode: 'size',
-	weightFrom: null,
-	weightSize: 1,
-	weightSizeMin: null,
-	weightSizeMax: null,
-	weightGradient: { 0: '#f00', 0.33: '#ff0', 0.66: '#0f0', 1: '#00f' },
-	txtOpt: true,
-	txtScale: 2,
-	frontSelect: false,
-	wheelZoom: true,
-	zoomMin: 0.3,
-	zoomMax: 3,
-	zoomStep: 0.05,
-	shape: 'sphere',
-	lock: null,
-	tooltip: null,
-	tooltipDelay: 300,
-	tooltipClass: 'tctooltip',
-	radiusX: 1,
-	radiusY: 1,
-	radiusZ: 1,
-	stretchX: 1,
-	stretchY: 1,
-	offsetX: 0,
-	offsetY: 0,
-	shuffleTags: false,
-	noSelect: false,
-	noMouse: false,
-	imageScale: 1,
-	paused: false,
-	dragControl: false,
-	dragThreshold: 4,
-	centreFunc: Nop as any,
-	splitWidth: 0,
-	animTiming: 'Smooth',
-	clickToFront: false,
-	fadeIn: 0,
-	padding: 0,
-	bgColour: null,
-	bgRadius: 0,
-	bgOutline: null,
-	bgOutlineThickness: 0,
-	outlineIncrease: 4,
-	textAlign: 'centre',
-	textVAlign: 'middle',
-	imageMode: null,
-	imagePosition: null,
-	imagePadding: 2,
-	imageAlign: 'centre',
-	imageVAlign: 'middle',
-	noTagsMessage: true,
-	centreImage: null,
-	pinchZoom: false,
-	repeatTags: 0,
-	minTags: 0,
-	imageRadius: 0,
-	scrollPause: false,
-	outlineDash: 0,
-	outlineDashSpace: 0,
-	outlineDashSpeed: 1,
-	activeAudio: '',
-	audioVolume: 1,
-	audioIcon: 1,
-	audioIconSize: 20,
-	audioIconThickness: 2,
-	audioIconDark: 0,
-	altImage: 0,
-};
-
 export class TagCanvas {
 	static tc: Record<string, any> = {};
 	static options: TagCanvasOptions = { ...defaultTagCanvasOptions };

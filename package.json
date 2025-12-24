@@ -6,7 +6,7 @@
   "main": "./dist/tagcanvas.js",
   "types": "./dist/tagcanvas.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && tsc-alias"
   },
   "contributors": [
     "Graham Breach <graham@goat1000.com>",
@@ -15,6 +15,7 @@
   "license": "LGPL-3.0-only",
   "packageManager": "pnpm@10.14.0",
   "devDependencies": {
+    "tsc-alias": "1.8.16",
     "typescript": "5.9.3"
   }
 }

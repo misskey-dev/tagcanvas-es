@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "declaration": true,
     "outDir": "./dist/",
     "removeComments": true,
@@ -11,7 +12,10 @@
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "esModuleInterop": true,
-    "lib": ["DOM", "ESNext"]
+    "lib": ["DOM", "ESNext"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src/**/*",
