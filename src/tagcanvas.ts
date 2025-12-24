@@ -31,11 +31,6 @@ const pow = Math.pow;
 
 const doc = document;
 
-let ocanvas: HTMLCanvasElement | null | undefined;
-let audio: AudioContext | 'off' | undefined;
-let audioClick: ((e: Event) => void) | undefined;
-const handlers: Record<string, any[]> = {};
-
 const hexlookup1: Record<string, string> = {
 	0: '0,',
 	1: '17,',
@@ -71,24 +66,25 @@ const hexlookup2: Record<string, string> = (() => {
 	return out;
 })();
 
-const hexlookup3: Record<string, string> = {};
+// NOTE: Mutable caches / registries are kept on TagCanvas (static) or instances
+// to avoid module-level shared state that can break atomic operations.
 
 function SetupAudio(): AudioContext | undefined {
 	// @ts-expect-error: webkitAudioContext exists on some browsers
 	const ac = window.AudioContext || window.webkitAudioContext;
 	try {
 		if (!ac) {
-			audio = 'off';
+			TagCanvas.sharedAudioContext = 'off';
 			return undefined;
 		}
-		audio = new ac();
-		if (!audio) {
-			audio = 'off';
+		TagCanvas.sharedAudioContext = new ac();
+		if (!TagCanvas.sharedAudioContext) {
+			TagCanvas.sharedAudioContext = 'off';
 			return undefined;
 		}
-		return audio;
+		return TagCanvas.sharedAudioContext;
 	} catch {
-		audio = 'off';
+		TagCanvas.sharedAudioContext = 'off';
 		return undefined;
 	}
 }
@@ -166,19 +162,19 @@ function SetAlpha(c: string, a: number) {
 	let p2: number;
 	const ae = (a * 1).toPrecision(3) + ')';
 	if (c[0] === '#') {
-		if (!hexlookup3[c]) {
+		if (!TagCanvas.hexlookup3[c]) {
 			if (c.length === 4) {
-				hexlookup3[c] =
+				TagCanvas.hexlookup3[c] =
 					'rgba(' + hexlookup1[c[1]] + hexlookup1[c[2]] + hexlookup1[c[3]];
 			} else {
-				hexlookup3[c] =
+				TagCanvas.hexlookup3[c] =
 					'rgba(' +
 					hexlookup2[c.substr(1, 2)] +
 					hexlookup2[c.substr(3, 2)] +
 					hexlookup2[c.substr(5, 2)];
 			}
 		}
-		d = hexlookup3[c] + ae;
+		d = TagCanvas.hexlookup3[c] + ae;
 	} else if (c.substr(0, 4) === 'rgb(' || c.substr(0, 4) === 'hsl(') {
 		d = c.replace('(', 'a(').replace(')', ',' + ae);
 	} else if (c.substr(0, 5) === 'rgba(' || c.substr(0, 5) === 'hsla(') {
@@ -1146,11 +1142,13 @@ class Outline {
 		const fw = (min(ccanvas.width - fx, w) + 0.5) | 0;
 		const fh = (min(ccanvas.height - fy, h) + 0.5) | 0;
 
+		let ocanvas = this.tc.outlineCanvas as HTMLCanvasElement | null | undefined;
 		if (ocanvas) {
 			ocanvas.width = fw;
 			ocanvas.height = fh;
 		} else {
 			ocanvas = NewCanvas(fw, fh);
+			this.tc.outlineCanvas = ocanvas;
 		}
 		if (!ocanvas) {
 			this.SetMethod('outline', undefined);
@@ -1557,8 +1555,8 @@ class Tag {
 
 	PlayAudio(): boolean {
 		if (this.tc.audioOff) return false;
-		if (!audio && !SetupAudio()) return false;
-		const ctx = audio;
+		if (!TagCanvas.sharedAudioContext && !SetupAudio()) return false;
+		const ctx = TagCanvas.sharedAudioContext;
 		if (!ctx || ctx === 'off') return false;
 
 		let a: any = this.tc.audio;
@@ -1596,6 +1594,12 @@ class Tag {
 	}
 }
 export class TagCanvas {
+	// Shared registries / caches (kept on the class, not module scope)
+	static handlers: Record<string, any[]> = {};
+	static sharedAudioContext: AudioContext | 'off' | undefined;
+	static sharedAudioClick: ((e: Event) => void) | undefined;
+	static hexlookup3: Record<string, string> = {};
+
 	static tc: Record<string, any> = {};
 	static options: TagCanvasOptions = { ...defaultTagCanvasOptions };
 	static NextFrame: any;
@@ -1607,6 +1611,8 @@ export class TagCanvas {
 
 	canvas: HTMLCanvasElement;
 	ctxt: CanvasRenderingContext2D;
+	// per-instance offscreen canvas used by outlines (avoids cross-instance interference)
+	outlineCanvas?: HTMLCanvasElement | null;
 
 	// lots of dynamic options/properties; keep as any for compatibility
 	[k: string]: any;
@@ -1677,7 +1683,8 @@ export class TagCanvas {
 		}
 
 		if (this.activeAudio === false) {
-			audio = 'off';
+			// Disable audio for this instance only
+			this.audioOff = true;
 		} else {
 			this.activeAudio && this.LoadAudio();
 		}
@@ -1713,8 +1720,8 @@ export class TagCanvas {
 			this.Tooltip = this.TooltipNone;
 		}
 
-		if (!this.noMouse && !handlers[cid]) {
-			handlers[cid] = [
+		if (!this.noMouse && !TagCanvas.handlers[cid]) {
+			TagCanvas.handlers[cid] = [
 				['mousemove', MouseMove],
 				['mouseout', MouseOut],
 				['mouseup', MouseUp],
@@ -1724,18 +1731,18 @@ export class TagCanvas {
 				['touchmove', TouchMove],
 			];
 			if (this.dragControl) {
-				handlers[cid].push(['mousedown', MouseDown]);
-				handlers[cid].push(['selectstart', Nop]);
+				TagCanvas.handlers[cid].push(['mousedown', MouseDown]);
+				TagCanvas.handlers[cid].push(['selectstart', Nop]);
 			}
 			if (this.wheelZoom) {
-				handlers[cid].push(['mousewheel', MouseWheel]);
-				handlers[cid].push(['DOMMouseScroll', MouseWheel]);
+				TagCanvas.handlers[cid].push(['mousewheel', MouseWheel]);
+				TagCanvas.handlers[cid].push(['DOMMouseScroll', MouseWheel]);
 			}
 			if (this.scrollPause) {
-				handlers[cid].push(['scroll', Scroll, window]);
+				TagCanvas.handlers[cid].push(['scroll', Scroll, window]);
 			}
-			for (let i = 0; i < handlers[cid].length; ++i) {
-				const p = handlers[cid][i];
+			for (let i = 0; i < TagCanvas.handlers[cid].length; ++i) {
+				const p = TagCanvas.handlers[cid][i];
 				AddHandler(p[0], p[1], p[2] ? p[2] : c);
 			}
 		}
@@ -1790,7 +1797,8 @@ export class TagCanvas {
 	}
 
 	AddAudio(e: any, t: any) {
-		if (audio === 'off') return;
+		if (TagCanvas.sharedAudioContext === 'off') return;
+		if (this.activeAudio === false) return;
 		const au = e.getElementsByTagName('audio');
 		if (au.length) {
 			t.SetAudio(au[0]);
@@ -1983,7 +1991,8 @@ export class TagCanvas {
 	}
 
 	LoadAudio() {
-		if (!audio && !SetupAudio()) return;
+		if (!TagCanvas.sharedAudioContext && !SetupAudio()) return;
+		const audio = TagCanvas.sharedAudioContext;
 		if (audio === 'off' || !audio) return;
 		this.audio = doc.createElement('audio');
 		this.audio.src = this.activeAudio;
@@ -1992,11 +2001,13 @@ export class TagCanvas {
 		this.track.connect(this.gain);
 		this.gain.connect(audio.destination);
 		this.hasAudio = 1;
-		audioClick = function () {
-			audio && audio !== 'off' && (audio as any).resume();
-			audioClick && doc.removeEventListener('click', audioClick);
+		TagCanvas.sharedAudioClick = function () {
+			const ctx = TagCanvas.sharedAudioContext;
+			ctx && ctx !== 'off' && (ctx as any).resume();
+			TagCanvas.sharedAudioClick && doc.removeEventListener('click', TagCanvas.sharedAudioClick);
+			TagCanvas.sharedAudioClick = undefined;
 		};
-		doc.addEventListener('click', audioClick);
+		doc.addEventListener('click', TagCanvas.sharedAudioClick);
 	}
 
 	ShowAudioIcon() {
@@ -2011,6 +2022,7 @@ export class TagCanvas {
 		const d = this.audioIconDark;
 		let muted = this.audioOff;
 		const sus = 'suspended';
+		const audio = TagCanvas.sharedAudioContext;
 		if (!audio || audio === 'off') return;
 		if (!muted) muted = ((audio as any).state === sus);
 		if (this.audioIcon && this.hasAudio) {
@@ -2030,6 +2042,7 @@ export class TagCanvas {
 	}
 
 	ToggleAudio() {
+		const audio = TagCanvas.sharedAudioContext;
 		const on = this.audioOff || (audio && audio !== 'off' && (audio as any).state === 'suspended');
 		on || (this.currentAudio && this.currentAudio.StopAudio());
 		this.audioOff = !on;
@@ -2442,13 +2455,14 @@ export class TagCanvas {
 	}
 
 	static Delete(id: string) {
-		if (handlers[id]) {
+		if (TagCanvas.handlers[id]) {
 			const c = doc.getElementById(id);
 			if (c) {
-				for (let i = 0; i < handlers[id].length; ++i) RemoveHandler(handlers[id][i][0], handlers[id][i][1], c);
+				for (let i = 0; i < TagCanvas.handlers[id].length; ++i)
+					RemoveHandler(TagCanvas.handlers[id][i][0], TagCanvas.handlers[id][i][1], c);
 			}
 		}
-		delete handlers[id];
+		delete TagCanvas.handlers[id];
 		delete TagCanvas.tc[id];
 	}
 }
