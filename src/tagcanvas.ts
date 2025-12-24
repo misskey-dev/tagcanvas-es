@@ -20,16 +20,6 @@ import type { TagCanvasOptions, ThreeDCoord, XY, XYZ } from '@/tagcanvas/types';
 export type { TagCanvasOptions } from '@/tagcanvas/types';
 export { defaultTagCanvasOptions };
 
-const abs = Math.abs;
-const sin = Math.sin;
-const cos = Math.cos;
-const max = Math.max;
-const min = Math.min;
-const ceil = Math.ceil;
-const sqrt = Math.sqrt;
-const pow = Math.pow;
-
-const doc = document;
 
 const hexlookup1: Record<string, string> = {
 	0: '0,',
@@ -188,7 +178,7 @@ function SetAlpha(c: string, a: number) {
 
 function NewCanvas(w: number, h: number) {
 	if ((window as any).G_vmlCanvasManager) return null;
-	const c = doc.createElement('canvas');
+	const c = document.createElement('canvas');
 	c.width = w;
 	c.height = h;
 	return c;
@@ -235,7 +225,7 @@ function FindGradientColour(tc: any, p: number, r?: number) {
 		c = cv.getContext('2d')!;
 		for (let i = 0; i < h; ++i) SetGradient(c, l, i, gl[i]);
 	}
-	r = max(min(r || 0, h - 1), 0);
+	r = Math.max(Math.min(r || 0, h - 1), 0);
 	d = c.getImageData(~~((l - 1) * p), r, 1, 1).data;
 	return 'rgba(' + d[0] + ',' + d[1] + ',' + d[2] + ',' + d[3] / 255 + ')';
 }
@@ -257,11 +247,11 @@ function TextSet(
 	const xo =
 		padx +
 		(shadowBlur || 0) +
-		(shadowOffsets.length && shadowOffsets[0] < 0 ? abs(shadowOffsets[0]) : 0);
+		(shadowOffsets.length && shadowOffsets[0] < 0 ? Math.abs(shadowOffsets[0]) : 0);
 	let yo =
 		pady +
 		(shadowBlur || 0) +
-		(shadowOffsets.length && shadowOffsets[1] < 0 ? abs(shadowOffsets[1]) : 0);
+		(shadowOffsets.length && shadowOffsets[1] < 0 ? Math.abs(shadowOffsets[1]) : 0);
 	ctxt.font = font;
 	ctxt.textBaseline = 'top';
 	ctxt.fillStyle = colour;
@@ -360,12 +350,12 @@ class TextCanvas {
 			iw: number,
 			ih: number;
 		let rr: number;
-		const sox = abs(shadowOffsets[0]);
-		const soy = abs(shadowOffsets[1]);
+		const sox = Math.abs(shadowOffsets[0]);
+		const soy = Math.abs(shadowOffsets[1]);
 		let shadowcv: HTMLCanvasElement | null | undefined;
 		let shadowc: CanvasRenderingContext2D | undefined;
 
-		padding = max(padding, sox + shadowBlur, soy + shadowBlur);
+		padding = Math.max(padding, sox + shadowBlur, soy + shadowBlur);
 		x1 = 2 * (padding + bgOutlineThickness);
 		y1 = 2 * (padding + bgOutlineThickness);
 		cw = this.width + x1;
@@ -381,7 +371,7 @@ class TextCanvas {
 				else offx += this.Align(this.width, iw, this.align);
 				if (this.ipos === 'top') offy += ih + this.ipad!;
 				else iy += this.height + this.ipad!;
-				cw = max(cw, iw + x1);
+				cw = Math.max(cw, iw + x1);
 				ch += ih + this.ipad!;
 			} else {
 				if (ih < this.height) iy += this.Align(ih, this.height, this.ivalign);
@@ -389,7 +379,7 @@ class TextCanvas {
 				if (this.ipos === 'right') ix += this.width + this.ipad!;
 				else offx += iw + this.ipad!;
 				cw += iw + this.ipad!;
-				ch = max(ch, ih + y1);
+				ch = Math.max(ch, ih + y1);
 			}
 		}
 
@@ -399,7 +389,7 @@ class TextCanvas {
 		x1 = y1 = bgOutlineThickness / 2;
 		x2 = cw - bgOutlineThickness;
 		y2 = ch - bgOutlineThickness;
-		rr = min(radius, x2 / 2, y2 / 2);
+		rr = Math.min(radius, x2 / 2, y2 / 2);
 		c = cv.getContext('2d')!;
 
 		if (bgColour) {
@@ -477,7 +467,8 @@ function AddBackgroundToImage(
 	const y2 = ch - othickness;
 	padding = padding * scale + x1;
 	const c = cv.getContext('2d')!;
-	const rr = min(radius, x2 / 2, y2 / 2);
+	const rr = Math.min(radius, x2 / 2, y2 / 2);
+
 
 	if (colour) {
 		c.fillStyle = colour;
@@ -510,21 +501,21 @@ function RoundImage(i: any, r: any, iw: number, ih: number, s: number) {
 	const cv = NewCanvas(iw, ih);
 	if (!cv) return null;
 	let r1 = parseFloat(r);
-	const l = max(iw, ih);
+	const l = Math.max(iw, ih);
 	if (r.indexOf('%') > 0) r1 = (l * r1) / 100;
 	else r1 = r1 * s;
 	const c = cv.getContext('2d')!;
 	c.globalCompositeOperation = 'source-over';
 	c.fillStyle = '#fff';
 	if (r1 >= l / 2) {
-		r1 = min(iw, ih) / 2;
+		r1 = Math.min(iw, ih) / 2;
 		c.beginPath();
 		c.moveTo(iw / 2, ih / 2);
 		c.arc(iw / 2, ih / 2, r1, 0, 2 * Math.PI, false);
 		c.fill();
 		c.closePath();
 	} else {
-		r1 = min(iw / 2, ih / 2, r1);
+		r1 = Math.min(iw / 2, ih / 2, r1);
 		RRect(c, 0, 0, iw, ih, r1, true);
 		c.fill();
 	}
@@ -534,8 +525,8 @@ function RoundImage(i: any, r: any, iw: number, ih: number, s: number) {
 }
 
 function AddShadowToImage(i: any, w: number, h: number, scale: number, sc: any, sb: number, so: number[]) {
-	const sw = abs(so[0]);
-	const sh = abs(so[1]);
+	const sw = Math.abs(so[0]);
+	const sh = Math.abs(so[1]);
 	const cw = w + (sw > sb ? sw + sb : sb * 2) * scale;
 	const ch = h + (sh > sb ? sh + sb : sb * 2) * scale;
 	const xo = scale * ((sb || 0) + (so[0] < 0 ? sw : 0));
@@ -594,13 +585,13 @@ function FixFont(f: string) {
 }
 
 function AddHandler(h: string, f: EventListener, e?: EventTarget | Document) {
-	const target: any = e || doc;
+	const target: any = e || document;
 	if (target.addEventListener) target.addEventListener(h, f, false);
 	else target.attachEvent?.('on' + h, f);
 }
 
 function RemoveHandler(h: string, f: EventListener, e?: EventTarget | Document) {
-	const target: any = e || doc;
+	const target: any = e || document;
 	if (target.removeEventListener) target.removeEventListener(h, f);
 	else target.detachEvent?.('on' + h, f);
 }
@@ -693,7 +684,7 @@ function AddImage(i: any, o: any, alt: any, t: any, tc: any) {
 }
 
 function GetProperty(e: Element, p: string) {
-	const dv: any = (doc as any).defaultView;
+	const dv: any = (document as any).defaultView;
 	const pc = p.replace(/\-([a-z])/g, function (a) {
 		return a.charAt(1).toUpperCase();
 	});
@@ -724,10 +715,10 @@ function EventToCanvasId(e: any) {
 }
 
 function AbsPos(id: string): XY {
-	const e = doc.getElementById(id)!;
+	const e = document.getElementById(id)!;
 	const r = e.getBoundingClientRect();
-	const dd = doc.documentElement;
-	const b = doc.body;
+	const dd = document.documentElement;
+	const b = document.body;
 	const w = window;
 	const xs = w.pageXOffset || dd.scrollLeft;
 	const ys = w.pageYOffset || dd.scrollTop;
@@ -789,7 +780,7 @@ function MouseMove(e: any) {
 
 function MouseDown(e: any) {
 	const t: any = TagCanvas;
-	const cb = (doc as any).addEventListener ? 0 : 1;
+	const cb = (document as any).addEventListener ? 0 : 1;
 	const tg = EventToCanvasId(e);
 	if (tg && e.button === cb && t.tc[tg]) {
 		t.tc[tg].BeginDrag(e);
@@ -798,7 +789,7 @@ function MouseDown(e: any) {
 
 function MouseUp(e: any) {
 	const t: any = TagCanvas;
-	const cb = (doc as any).addEventListener ? 0 : 1;
+	const cb = (document as any).addEventListener ? 0 : 1;
 	const tg = EventToCanvasId(e);
 	if (tg && e.button === cb && t.tc[tg]) {
 		const tc = t.tc[tg];
@@ -1062,7 +1053,7 @@ class Outline {
 			g1 = g,
 			g2 = 0;
 		if (s) {
-			let seq = abs(s) * ((TimeNow() - (this.ts as any)) / 50);
+			let seq = Math.abs(s) * ((TimeNow() - (this.ts as any)) / 50);
 			if (s < 0) seq = 8.64e6 - seq;
 			s = ~~seq % length;
 		}
@@ -1083,7 +1074,7 @@ class Outline {
 	}
 
 	DrawOutline(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, colour: any) {
-		const r = min(this.radius, h / 2, w / 2);
+		const r = Math.min(this.radius, h / 2, w / 2);
 		c.strokeStyle = colour;
 		this.Ants(c);
 		RRect(c, x, y, w, h, r, true);
@@ -1114,7 +1105,7 @@ class Outline {
 	DrawColour(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, colour: any, tag: any, x1: number, y1: number) {
 		if (tag.oimage) {
 			if (this.pulse < 1) {
-				tag.alpha = 1 - pow(this.pulse, 2);
+				tag.alpha = 1 - Math.pow(this.pulse, 2);
 				tag.Draw(c, x1, y1, tag.fimage);
 				tag.alpha = this.pulse;
 			} else {
@@ -1137,10 +1128,10 @@ class Outline {
 
 	DrawColourImage(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, colour: any, tag: any, x1: number, y1: number) {
 		const ccanvas = c.canvas;
-		const fx = ~~max(x, 0);
-		const fy = ~~max(y, 0);
-		const fw = (min(ccanvas.width - fx, w) + 0.5) | 0;
-		const fh = (min(ccanvas.height - fy, h) + 0.5) | 0;
+		const fx = ~~Math.max(x, 0);
+		const fy = ~~Math.max(y, 0);
+		const fw = (Math.min(ccanvas.width - fx, w) + 0.5) | 0;
+		const fh = (Math.min(ccanvas.height - fy, h) + 0.5) | 0;
 
 		let ocanvas = this.tc.outlineCanvas as HTMLCanvasElement | null | undefined;
 		if (ocanvas) {
@@ -1157,7 +1148,7 @@ class Outline {
 		const cc = ocanvas.getContext('2d')!;
 		cc.drawImage(ccanvas, fx, fy, fw, fh, 0, 0, fw, fh);
 		c.clearRect(fx, fy, fw, fh);
-		tag.alpha = this.pulsate ? 1 - pow(this.pulse, 2) : 1;
+		tag.alpha = this.pulsate ? 1 - Math.pow(this.pulse, 2) : 1;
 		tag.Draw(c, x1, y1);
 		c.setTransform(1, 0, 0, 1, 0, 0);
 		c.save();
@@ -1185,7 +1176,7 @@ class Outline {
 	}
 
 	DrawBlock(c: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, colour: any) {
-		const r = min(this.radius, h / 2, w / 2);
+		const r = Math.min(this.radius, h / 2, w / 2);
 		c.fillStyle = colour;
 		RRect(c, x, y, w, h, r);
 	}
@@ -1207,7 +1198,7 @@ class Outline {
 		const t = this.tc;
 		let ga =
 			t.pulsateTo +
-			(1 - t.pulsateTo) * (0.5 + cos((2 * Math.PI * diff) / (1000 * t.pulsateTime)) / 2);
+			(1 - t.pulsateTo) * (0.5 + Math.cos((2 * Math.PI * diff) / (1000 * t.pulsateTime)) / 2);
 		this.pulse = ga = (TagCanvas as any).Smooth(1, ga);
 		return this.DrawSimple(c, tag, x1, y1, ga, 1);
 	}
@@ -1332,7 +1323,7 @@ class Tag {
 		for (let i = 0; i < l; ++i) {
 			const wl = c.measureText(this.text[i]).width;
 			this.line_widths[i] = wl;
-			w = max(w, wl);
+			w = Math.max(w, wl);
 		}
 		return w;
 	}
@@ -1425,7 +1416,7 @@ class Tag {
 			if (t.weightSizeMin > 0 && t.weightSizeMax > t.weightSizeMin) {
 				this.textHeight = t.weightSize * (t.weightSizeMin + (t.weightSizeMax - t.weightSizeMin) * nweight);
 			} else {
-				this.textHeight = max(1, w * t.weightSize);
+				this.textHeight = Math.max(1, w * t.weightSize);
 			}
 		}
 	}
@@ -1537,14 +1528,14 @@ class Tag {
 			}
 			return;
 		}
-		if (doc.createEvent) {
-			const evt = doc.createEvent('MouseEvents');
+		if (document.createEvent) {
+			const evt = document.createEvent('MouseEvents');
 			evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 			if (!a.dispatchEvent(evt)) return;
 		} else if ((a as any).fireEvent) {
 			if (!(a as any).fireEvent('onclick')) return;
 		}
-		(doc as any).location = h;
+		(document as any).location = h;
 	}
 
 	StopAudio() {
@@ -1579,7 +1570,7 @@ class Tag {
 		if (a) {
 			if ((ctx as any).state === sus) (ctx as any).resume();
 			if ((ctx as any).state === sus) return false;
-			g.gain.value = min(2, max(0, this.tc.audioVolume * 1));
+			g.gain.value = Math.min(2, Math.max(0, this.tc.audioVolume * 1));
 			a.currentTime = 0;
 			this.stopped = 0;
 			p = a.play();
@@ -1618,7 +1609,7 @@ export class TagCanvas {
 	[k: string]: any;
 
 	constructor(cid: string, lctr?: string, opt?: TagCanvasOptions) {
-		let c = doc.getElementById(cid) as HTMLCanvasElement | null;
+		let c = document.getElementById(cid) as HTMLCanvasElement | null;
 		const cp: Array<'id' | 'className' | 'innerHTML'> = ['id', 'className', 'innerHTML'];
 		if (!c) throw new Error('Canvas not found');
 
@@ -1627,7 +1618,7 @@ export class TagCanvas {
 			(this as any).ie = parseFloat(navigator.appVersion.split('MSIE')[1]);
 		}
 		if (c && (!c.getContext || !c.getContext('2d')!.fillText)) {
-			const p = doc.createElement('DIV');
+			const p = document.createElement('DIV');
 			for (let i = 0; i < cp.length; ++i) (p as any)[cp[i]] = (c as any)[cp[i]];
 			c.parentNode!.insertBefore(p, c);
 			c.parentNode!.removeChild(c);
@@ -1641,9 +1632,9 @@ export class TagCanvas {
 
 		this.canvas = c;
 		this.ctxt = c.getContext('2d')!;
-		this.z1 = 250 / max(this.depth, 0.001);
+		this.z1 = 250 / Math.max(this.depth, 0.001);
 		this.z2 = this.z1 / this.zoom;
-		this.radius = min(c.height, c.width) * 0.0075;
+		this.radius = Math.min(c.height, c.width) * 0.0075;
 		this.max_radius = 100;
 		this.max_weight = [];
 		this.min_weight = [];
@@ -1659,12 +1650,12 @@ export class TagCanvas {
 		this.frozen = this.dx = this.dy = this.fixedAnim = this.touchState = 0;
 		this.fixedAlpha = 1;
 		this.source = lctr || cid;
-		this.repeatTags = min(64, ~~this.repeatTags);
-		this.minTags = min(200, ~~this.minTags);
+		this.repeatTags = Math.min(64, ~~this.repeatTags);
+		this.minTags = Math.min(200, ~~this.minTags);
 		if (~~this.scrollPause > 0) TagCanvas.scrollPause = ~~this.scrollPause;
 		else this.scrollPause = 0;
 		if (this.minTags > 0 && this.repeatTags < 1 && (this as any).GetTags().length) {
-			this.repeatTags = ceil(this.minTags / (this as any).GetTags().length) - 1;
+			this.repeatTags = Math.ceil(this.minTags / (this as any).GetTags().length) - 1;
 		}
 
 		this.transform = Matrix.Identity();
@@ -1708,12 +1699,12 @@ export class TagCanvas {
 			} else {
 				this.Tooltip = this.TooltipDiv;
 				if (!this.ttdiv) {
-					this.ttdiv = doc.createElement('div');
+					this.ttdiv = document.createElement('div');
 					this.ttdiv.className = this.tooltipClass;
 					this.ttdiv.style.position = 'absolute';
 					this.ttdiv.style.zIndex = ((c.style.zIndex as any) || 0) + 1;
 					AddHandler('mouseover', function (e: any) { e.target.style.display = 'none'; }, this.ttdiv);
-					doc.body.appendChild(this.ttdiv);
+					document.body.appendChild(this.ttdiv);
 				}
 			}
 		} else {
@@ -1756,8 +1747,8 @@ export class TagCanvas {
 	}
 
 	SourceElements() {
-		if (doc.querySelectorAll) return doc.querySelectorAll('#' + this.source);
-		return [doc.getElementById(this.source)];
+		if (document.querySelectorAll) return document.querySelectorAll('#' + this.source);
+		return [document.getElementById(this.source)];
 	}
 
 	HideTags() {
@@ -1783,11 +1774,11 @@ export class TagCanvas {
 		for (let i = 0; i < tc.length; ++i) {
 			if (tc[i] !== ' ') {
 				const p = i - tc.length / 2;
-				const a = doc.createElement('a') as HTMLAnchorElement;
+				const a = document.createElement('a') as HTMLAnchorElement;
 				a.href = '#';
 				a.innerText = tc[i];
-				const x = 100 * sin(p / 9);
-				const z = -100 * cos(p / 9);
+				const x = 100 * Math.sin(p / 9);
+				const z = -100 * Math.cos(p / 9);
 				const t = new Tag(this, tc[i], a, [x, 0, z], 2, 18, '#000', '#fff', 0, 0, 0, 'monospace', 2, tc[i]);
 				t.Init();
 				tl.push(t);
@@ -1904,7 +1895,7 @@ export class TagCanvas {
 			const rx = 100 * this.radiusX;
 			const ry = 100 * this.radiusY;
 			const rz = 100 * this.radiusZ;
-			this.max_radius = max(rx, max(ry, rz));
+			this.max_radius = Math.max(rx, Math.max(ry, rz));
 			for (let i = 0; i < tl.length; ++i) {
 				const t = this.CreateTag(tl[tagmap[i]]);
 				if (t) taglist.push(t);
@@ -1974,7 +1965,7 @@ export class TagCanvas {
 			let j = newlist.length / (added.length + 1);
 			let i = 0;
 			while (added.length) {
-				newlist.splice(ceil(++i * j), 0, this.CreateTag(tl[added.shift()!]));
+				newlist.splice(Math.ceil(++i * j), 0, this.CreateTag(tl[added.shift()!]));
 			}
 			this.shapeArgs[0] = newlist.length;
 			const vl = this.shape.apply(this, this.shapeArgs);
@@ -1994,7 +1985,7 @@ export class TagCanvas {
 		if (!TagCanvas.sharedAudioContext && !SetupAudio()) return;
 		const audio = TagCanvas.sharedAudioContext;
 		if (audio === 'off' || !audio) return;
-		this.audio = doc.createElement('audio');
+		this.audio = document.createElement('audio');
 		this.audio.src = this.activeAudio;
 		this.track = audio.createMediaElementSource(this.audio);
 		this.gain = audio.createGain();
@@ -2004,10 +1995,10 @@ export class TagCanvas {
 		TagCanvas.sharedAudioClick = function () {
 			const ctx = TagCanvas.sharedAudioContext;
 			ctx && ctx !== 'off' && (ctx as any).resume();
-			TagCanvas.sharedAudioClick && doc.removeEventListener('click', TagCanvas.sharedAudioClick);
+			TagCanvas.sharedAudioClick && document.removeEventListener('click', TagCanvas.sharedAudioClick);
 			TagCanvas.sharedAudioClick = undefined;
 		};
-		doc.addEventListener('click', TagCanvas.sharedAudioClick);
+		document.addEventListener('click', TagCanvas.sharedAudioClick);
 	}
 
 	ShowAudioIcon() {
@@ -2177,10 +2168,10 @@ export class TagCanvas {
 
 	Transform(tc: any, p: number, y: number) {
 		if (p || y) {
-			const sp = sin(p);
-			const cp = cos(p);
-			const sy = sin(y);
-			const cy = cos(y);
+			const sp = Math.sin(p);
+			const cp = Math.cos(p);
+			const sy = Math.sin(y);
+			const cy = Math.cos(y);
 			const ym = new Matrix([cy, 0, sy, 0, 1, 0, -sy, 0, cy]);
 			const pm = new Matrix([1, 0, 0, 0, cp, -sp, 0, sp, cp]);
 			tc.transform = tc.transform.mul(ym.mul(pm));
@@ -2267,8 +2258,8 @@ export class TagCanvas {
 
 	Decel(tc: any) {
 		const s = tc.minSpeed;
-		const ay = abs(tc.yaw);
-		const ap = abs(tc.pitch);
+		const ay = Math.abs(tc.yaw);
+		const ap = Math.abs(tc.pitch);
 		if (!tc.lx && ay > s) tc.yaw = ay > tc.z0 ? tc.yaw * tc.decel : 0;
 		if (!tc.ly && ap > s) tc.pitch = ap > tc.z0 ? tc.pitch * tc.decel : 0;
 	}
@@ -2293,7 +2284,7 @@ export class TagCanvas {
 
 	Wheel(i: any) {
 		const z = this.zoom + this.zoomStep * (i ? 1 : -1);
-		this.zoom = min(this.zoomMax, max(this.zoomMin, z));
+		this.zoom = Math.min(this.zoomMax, Math.max(this.zoomMin, z));
 		this.Zoom(this.zoom);
 	}
 
@@ -2335,7 +2326,7 @@ export class TagCanvas {
 		if (!p) return;
 		const d = PinchDistance(e);
 		const z = (p[1] * d) / p[0];
-		this.zoom = min(this.zoomMax, max(this.zoomMin, z));
+		this.zoom = Math.min(this.zoomMax, Math.max(this.zoomMin, z));
 		this.Zoom(this.zoom);
 	}
 
@@ -2412,7 +2403,7 @@ export class TagCanvas {
 		return t0 / t;
 	}
 	static Smooth(t: number, t0: number) {
-		return 0.5 - cos((t0 * Math.PI) / t) / 2;
+		return 0.5 - Math.cos((t0 * Math.PI) / t) / 2;
 	}
 
 	static Pause(id: string) {
@@ -2456,7 +2447,7 @@ export class TagCanvas {
 
 	static Delete(id: string) {
 		if (TagCanvas.handlers[id]) {
-			const c = doc.getElementById(id);
+			const c = document.getElementById(id);
 			if (c) {
 				for (let i = 0; i < TagCanvas.handlers[id].length; ++i)
 					RemoveHandler(TagCanvas.handlers[id][i][0], TagCanvas.handlers[id][i][1], c);
@@ -2470,5 +2461,5 @@ export class TagCanvas {
 function PinchDistance(e: any) {
 	const t1 = e.targetTouches[0];
 	const t2 = e.targetTouches[1];
-	return sqrt(pow(t2.pageX - t1.pageX, 2) + pow(t2.pageY - t1.pageY, 2));
+	return Math.sqrt(Math.pow(t2.pageX - t1.pageX, 2) + Math.pow(t2.pageY - t1.pageY, 2));
 }
