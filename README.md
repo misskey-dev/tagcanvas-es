@@ -1,3 +1,17 @@
+# `@misskey-dev/tagcanvas-es`
+
+This is a TypeScript port of the original TagCanvas library.
+
+## Installation
+
+```bash
+npm install @misskey-dev/tagcanvas-es
+```
+
+---
+
+*Original README from the original TagCanvas library:*
+
 TagCanvas HTML5 canvas tag cloud
 ================================
 
