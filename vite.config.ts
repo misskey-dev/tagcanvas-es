@@ -7,6 +7,7 @@ export default defineConfig({
     plugins: [dts({
         tsconfigPath: resolve(import.meta.dirname, 'tsconfig.app.json'),
         pathsToAliases: true,
+        exclude: ['src/playground.ts'],
     })],
     build: {
         lib: {
