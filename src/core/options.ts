@@ -323,10 +323,17 @@ const defaultOptionsValues: Required<TagCanvasOptions> = {
   altImage: false,
 };
 
+// `Object.freeze` is shallow, so the mutable defaults are frozen individually too.
+// Without this a caller could reach through `defaultOptions` and mutate them, changing
+// the defaults for every instance created afterwards.
+Object.freeze(defaultOptionsValues.shapeArgs);
+Object.freeze(defaultOptionsValues.shadowOffset);
+Object.freeze(defaultOptionsValues.weightGradient);
+
 /**
- * Default value for every {@link TagCanvasOptions} field. Read-only; there is no global
- * override mechanism (unlike the original `TagCanvas.options`) — pass options directly
- * to the `TagCanvas` constructor instead.
+ * Default value for every {@link TagCanvasOptions} field. Deeply read-only; there is no
+ * global override mechanism (unlike the original `TagCanvas.options`) — pass options
+ * directly to the `TagCanvas` constructor instead.
  *
  * Ported from `TagCanvas.options`.
  */
@@ -378,16 +385,31 @@ export function resolveOptions(options?: TagCanvasOptions): ResolvedOptions {
   const lockX = merged.lock === 'x' || merged.lock === 'xy';
   const lockY = merged.lock === 'y' || merged.lock === 'xy';
   const easing = resolveEasing(merged.animTiming);
-  const weightModes = Array.isArray(merged.weightMode) ? merged.weightMode : [merged.weightMode];
-  const weightFroms =
+  // Everything below is copied out of `merged` before being frozen, so the resolved
+  // options share no mutable object with the caller's options or with `defaultOptions`.
+  // Freezing is applied as a statement so the declared (mutable) types are preserved.
+  const weightModes: WeightMode[] = Array.isArray(merged.weightMode)
+    ? [...merged.weightMode]
+    : [merged.weightMode];
+  const weightFroms: (string | null)[] =
     merged.weightFrom === null
       ? [null]
       : Array.isArray(merged.weightFrom)
-        ? merged.weightFrom
+        ? [...merged.weightFrom]
         : [merged.weightFrom];
-  const weightGradients = Array.isArray(merged.weightGradient)
-    ? merged.weightGradient
-    : [merged.weightGradient];
+  const weightGradients: WeightGradient[] = (
+    Array.isArray(merged.weightGradient) ? merged.weightGradient : [merged.weightGradient]
+  ).map((gradient) => Object.freeze({ ...gradient }));
+  const shapeArgs: number[] = [...merged.shapeArgs];
+  const shadowOffset: Offset2D = [merged.shadowOffset[0], merged.shadowOffset[1]];
+  const initial: Offset2D | null =
+    merged.initial === null ? null : [merged.initial[0], merged.initial[1]];
+  Object.freeze(weightModes);
+  Object.freeze(weightFroms);
+  Object.freeze(weightGradients);
+  Object.freeze(shapeArgs);
+  Object.freeze(shadowOffset);
+  initial === null || Object.freeze(initial);
   const truncatedScrollPause = merged.scrollPause === false ? 0 : Math.trunc(merged.scrollPause);
   const scrollPauseMs = truncatedScrollPause > 0 ? truncatedScrollPause : 0;
 
@@ -406,6 +428,10 @@ export function resolveOptions(options?: TagCanvasOptions): ResolvedOptions {
     weightModes,
     weightFroms,
     weightGradients,
+    weightGradient: Array.isArray(merged.weightGradient) ? weightGradients : weightGradients[0],
+    shapeArgs,
+    shadowOffset,
+    initial,
     scrollPauseMs,
   });
 }

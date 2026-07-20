@@ -11,14 +11,17 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * Shuffles array `a` in place (Fisher-Yates style, last-to-first).
+ * Shuffles array `a` in place (Fisher-Yates, last-to-first).
  *
- * Ported from the original `Shuffle`.
+ * Ported from the original `Shuffle`, with its off-by-one corrected: the original
+ * drew from `[0, i)`, excluding the current index and so never letting an element
+ * stay put, which biases the resulting permutation. The draw is inclusive of `i`
+ * here, making every permutation equally likely.
  */
 export function shuffle<T>(a: T[]): void {
   let i = a.length - 1;
   while (i) {
-    const p = Math.trunc(Math.random() * i);
+    const p = Math.trunc(Math.random() * (i + 1));
     const t = a[i];
     a[i] = a[p];
     a[p] = t;

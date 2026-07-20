@@ -83,9 +83,9 @@ export type TagSelector = number | { index: number } | { id: string } | { text: 
 export interface RotateTagOptions {
   /** Tag to rotate into place. */
   tag: TagSelector;
-  /** Target latitude, in radians. */
+  /** Target latitude, in degrees. */
   lat: number;
-  /** Target longitude, in radians. */
+  /** Target longitude, in degrees. */
   lng: number;
   /** Animation duration in milliseconds. Defaults to 500. */
   time?: number;

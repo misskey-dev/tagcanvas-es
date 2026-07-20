@@ -237,7 +237,9 @@ export class TagCanvas implements CloudContext {
         const div = document.createElement('div');
         div.className = opts.tooltipClass;
         div.style.position = 'absolute';
-        div.style.zIndex = el.style.zIndex + 1;
+        // Coerce before adding: `el.style.zIndex` is a string, so `+ 1` would
+        // concatenate ("100" -> "1001"). An empty/unset value still yields "1".
+        div.style.zIndex = String(Number(el.style.zIndex || 0) + 1);
         div.addEventListener(
           'mouseover',
           (e) => {
@@ -748,6 +750,10 @@ export class TagCanvas implements CloudContext {
     const wfrom = opts.weightFroms;
     const wl = wfrom.length;
     const weights: number[][] = [];
+    // Recompute the extrema from scratch: keeping values from an earlier
+    // reload()/update() pass would skew the weighting once tags change.
+    this.minWeight.length = 0;
+    this.maxWeight.length = 0;
     for (let i = 0; i < tl.length; ++i) {
       weights[i] = [];
       for (let s = 0; s < wl; ++s) {
@@ -1091,7 +1097,25 @@ export class TagCanvas implements CloudContext {
     if (angle === 0) {
       this.#fixedCallback = callback ?? null;
     } else {
-      const u = v1.cross(v2).unit();
+      // Antiparallel vectors (`angle` is PI) have a zero-length cross product,
+      // which `unit()` turns into NaN. That NaN spreads through the rotation
+      // matrix into every tag's coordinates, collapsing the cloud instead of
+      // rotating it. Any axis perpendicular to v1 produces the same half-turn,
+      // so cross with whichever unit axis v1 is least aligned to.
+      let c = v1.cross(v2);
+      if (c.length() === 0) {
+        const ax = Math.abs(v1.x);
+        const ay = Math.abs(v1.y);
+        const az = Math.abs(v1.z);
+        const fallback =
+          ax <= ay && ax <= az
+            ? new Vector(1, 0, 0)
+            : ay <= az
+              ? new Vector(0, 1, 0)
+              : new Vector(0, 0, 1);
+        c = v1.cross(fallback);
+      }
+      const u = c.unit();
       this.#fixedAnim = { angle: -angle, axis: u, t: time, t0: performance.now(), cb: callback, tag, active };
     }
   }
@@ -1356,12 +1380,15 @@ export class TagCanvas implements CloudContext {
       return;
     }
     const s = div.style;
-    if (title !== div.innerHTML) {
+    // Tooltip text comes from anchor `title` attributes, which are plain text
+    // (native tooltips never render markup), so it is assigned as text rather
+    // than as HTML.
+    if (title !== div.textContent) {
       s.display = 'none';
     }
-    div.innerHTML = title;
+    div.textContent = title;
     if (tag) {
-      tag.title = div.innerHTML;
+      tag.title = title;
     }
     if (s.display === 'none' && this.#tttimer === null) {
       this.#tttimer = setTimeout(() => {

@@ -100,7 +100,7 @@ the call in `try`/`catch` if you want to hide the canvas on failure.
 | `setZoom(zoom)` | Sets the zoom level, clamped to `[zoomMin, zoomMax]`. |
 | `setVolume(volume)` | Sets audio playback volume. |
 | `toggleAudio()` | Toggles audio mute. |
-| `rotateTag(options)` | Rotates the cloud so a tag moves to a given `lat`/`lng` (radians). Returns `false` if the tag isn't found. |
+| `rotateTag(options)` | Rotates the cloud so a tag moves to a given `lat`/`lng` (degrees). Returns `false` if the tag isn't found. |
 | `tagToFront(options)` | Rotates the cloud so a tag moves to the front. Returns `false` if the tag isn't found. |
 | `destroy()` | Releases everything: event listeners, the animation loop, the tooltip element and audio nodes. The instance is inert afterwards. |
 
@@ -119,7 +119,7 @@ the call in `try`/`catch` if you want to hide the canvas on failure.
 
 ```ts
 tc.tagToFront({ tag: { text: 'Tag A' }, time: 600, callback: () => console.log('done') });
-tc.rotateTag({ tag: 0, lat: 0, lng: Math.PI / 2 });
+tc.rotateTag({ tag: 0, lat: 0, lng: 90 });
 ```
 
 ## Options
@@ -246,11 +246,12 @@ new TagCanvas('#myCanvas', { tagContainer: '#tags', shape: spiral, shapeArgs: [4
 
 ## TypeScript
 
-`TagCanvas` is exported both as a named and the default export. Every public type is
-exported as well:
+`TagCanvas` is a named export; there is no default export. Every public type is exported
+as well:
 
 ```ts
-import TagCanvas, {
+import {
+  TagCanvas,
   defaultOptions,
   type TagCanvasOptions,
   type TagShape,
