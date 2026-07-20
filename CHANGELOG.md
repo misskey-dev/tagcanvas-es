@@ -6,6 +6,7 @@
 Based version: 2.11.0
 
 - Fix: Image size calculation could fail depending on how the size is specified
+- Fix: Avoid throwing error on every frame if the image is not available or broken
 
 ## 0.1.1 / 2026/07/20
 

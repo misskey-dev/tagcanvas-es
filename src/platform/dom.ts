@@ -83,6 +83,17 @@ export function canvasXY(e: MouseEvent | Touch, canvas: HTMLCanvasElement): { x:
   };
 }
 
+/**
+ * Whether an image finished loading but failed, leaving it unusable.
+ *
+ * A broken image reports `complete` just like a successful one, but has no
+ * intrinsic size. Passing it to `drawImage` throws `InvalidStateError`, so it
+ * has to be filtered out before the tag adopts it.
+ */
+export function isImageBroken(img: HTMLImageElement): boolean {
+  return img.complete && img.naturalWidth === 0;
+}
+
 /** Parses a computed CSS size into pixels, or `null` if it is not a definite length. */
 function cssLength(value: string): number | null {
   if (!value.endsWith('px')) {

@@ -2,7 +2,7 @@ import type { Offset2D, WeightMode } from '@/types.js';
 import type { Matrix } from '@/math/matrix.js';
 import { clamp, project } from '@/math/utils.js';
 import { Vector } from '@/math/vector.js';
-import { getStyleProperty, resolveImageSize } from '@/platform/dom.js';
+import { getStyleProperty, isImageBroken, resolveImageSize } from '@/platform/dom.js';
 import { createTrack, getAudioContext } from '@/platform/audio.js';
 import type { AudioTrack } from '@/platform/audio.js';
 import type { CanvasImage } from '@/render/canvas.js';
@@ -391,23 +391,38 @@ export class Tag implements TagLike {
   attachImage(image: HTMLImageElement, source: HTMLImageElement, alt: HTMLImageElement | null): void {
     const ctx = this.ctx;
     const opts = ctx.opts;
-    this.image = this.fimage = image;
 
-    // Wait for every image to finish loading before measuring it.
+    // Wait for every image to finish loading before measuring it. `error`
+    // resumes the same way `load` does: a broken URL never fires `load`, so
+    // waiting only on that would leave the tag holding an unusable image.
     const pending = [source, image, alt].find((el): el is HTMLImageElement => el !== null && !el.complete);
     if (pending) {
-      pending.addEventListener(
-        'load',
-        () => {
-          if (ctx.destroyed) {
-            return;
-          }
-          this.attachImage(image, source, alt);
-        },
-        { once: true, signal: ctx.signal },
-      );
+      // Hold no image until it is known to be usable. A tag that adopts one
+      // mid-load ends up drawing it the moment it breaks, and the resulting
+      // exception aborts the whole frame — taking every other tag with it.
+      this.image = this.fimage = null;
+      const resume = (): void => {
+        if (ctx.destroyed) {
+          return;
+        }
+        this.attachImage(image, source, alt);
+      };
+      pending.addEventListener('load', resume, { once: true, signal: ctx.signal });
+      pending.addEventListener('error', resume, { once: true, signal: ctx.signal });
       return;
     }
+
+    // Drawing an image that failed to load throws `InvalidStateError` on every
+    // frame, so drop it and let the tag fall back to its text. A broken alt
+    // image only costs the hover swap.
+    if (isImageBroken(image) || isImageBroken(source)) {
+      this.image = this.fimage = null;
+      this.alt = null;
+      this.init();
+      return;
+    }
+    this.image = this.fimage = image;
+    const altImage = alt !== null && !isImageBroken(alt) ? alt : null;
 
     const size = resolveImageSize(source);
     if (source.getClientRects().length > 0) {
@@ -502,7 +517,7 @@ export class Tag implements TagLike {
         }
       }
     }
-    this.alt = alt;
+    this.alt = altImage;
     this.init();
   }
 
