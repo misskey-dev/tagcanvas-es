@@ -1116,6 +1116,14 @@ export class TagCanvas implements CloudContext {
         c = v1.cross(fallback);
       }
       const u = c.unit();
+      if (!Number.isFinite(u.x) || !Number.isFinite(u.y) || !Number.isFinite(u.z)) {
+        // No usable axis: the tag sits at the cloud's center, or so close to it
+        // that squaring its coordinates in `length()` underflows to zero. Either
+        // way no rotation can move the tag, so finish as if it were already in
+        // place rather than feeding a non-finite axis into the rotation matrix.
+        this.#fixedCallback = callback ?? null;
+        return;
+      }
       this.#fixedAnim = { angle: -angle, axis: u, t: time, t0: performance.now(), cb: callback, tag, active };
     }
   }
