@@ -82,3 +82,56 @@ export function canvasXY(e: MouseEvent | Touch, canvas: HTMLCanvasElement): { x:
     y: (e.clientY - rect.top) * (canvas.height / rect.height),
   };
 }
+
+/** Parses a computed CSS size into pixels, or `null` if it is not a definite length. */
+function cssLength(value: string): number | null {
+  if (!value.endsWith('px')) {
+    // `auto`, a percentage, or an empty string: not a resolvable length here.
+    return null;
+  }
+  const n = parseFloat(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/**
+ * Resolves the display size a source `<img>` is meant to have, in CSS pixels.
+ *
+ * `HTMLImageElement.width`/`height` only report the rendered size while the
+ * element is actually being laid out; for a `display: none` element (a tag list
+ * hidden by `hideTags`, or one the page hides itself) they fall back to the
+ * image's intrinsic size, silently discarding any CSS sizing. Reading the
+ * computed style instead keeps `style="width: 32px"` and stylesheet rules
+ * working in both states.
+ *
+ * When only one dimension is specified, the other is derived from the intrinsic
+ * aspect ratio — the same result layout would produce from `height: auto`.
+ *
+ * @param img - the source image element from the tag markup
+ * @returns the intended width/height in CSS pixels
+ */
+export function resolveImageSize(img: HTMLImageElement): { width: number; height: number } {
+  if (img.getClientRects().length > 0) {
+    // Being rendered, so layout has already applied the CSS (including the
+    // aspect-ratio fill-in) and the IDL properties are authoritative.
+    return { width: img.width, height: img.height };
+  }
+
+  const style = getComputedStyle(img);
+  const w = cssLength(style.width);
+  const h = cssLength(style.height);
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+
+  if (w !== null && h !== null) {
+    return { width: w, height: h };
+  }
+  if (w !== null) {
+    return { width: w, height: nw > 0 ? (w * nh) / nw : w };
+  }
+  if (h !== null) {
+    return { width: nh > 0 ? (h * nw) / nh : h, height: h };
+  }
+  // No CSS sizing at all: fall back to the width/height attributes, or the
+  // intrinsic size when those are absent too.
+  return { width: img.width, height: img.height };
+}

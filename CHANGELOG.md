@@ -1,6 +1,12 @@
 <!--
 ## 0.x.x (unreleased)
 -->
+## 0.1.2 (unreleased)
+
+Based version: 2.11.0
+
+- Fix: Image size calculation could fail depending on how the size is specified
+
 ## 0.1.1 / 2026/07/20
 
 Based version: 2.11.0

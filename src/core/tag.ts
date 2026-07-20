@@ -2,7 +2,7 @@ import type { Offset2D, WeightMode } from '@/types.js';
 import type { Matrix } from '@/math/matrix.js';
 import { clamp, project } from '@/math/utils.js';
 import { Vector } from '@/math/vector.js';
-import { getStyleProperty } from '@/platform/dom.js';
+import { getStyleProperty, resolveImageSize } from '@/platform/dom.js';
 import { createTrack, getAudioContext } from '@/platform/audio.js';
 import type { AudioTrack } from '@/platform/audio.js';
 import type { CanvasImage } from '@/render/canvas.js';
@@ -409,16 +409,22 @@ export class Tag implements TagLike {
       return;
     }
 
-    // Yes, this looks like a no-op, but it forces the width/height onto the
-    // element so proportional sizes survive the source image being hidden and
-    // reused for another cloud (as in the original).
-    source.width = source.width;
-    source.height = source.height;
+    const size = resolveImageSize(source);
+    if (source.getClientRects().length > 0) {
+      // Only stamp the size back onto the source element while it is being
+      // rendered, where the values reflect the applied CSS. This is what makes
+      // proportional sizes survive the element being hidden and reused for
+      // another cloud (as in the original). Writing them when the element is
+      // *not* rendered would burn the intrinsic size into the caller's markup,
+      // overriding their CSS and breaking the aspect ratio.
+      source.width = size.width;
+      source.height = size.height;
+    }
 
     const s = opts.imageScale;
     if (s) {
-      image.width = source.width * s;
-      image.height = source.height * s;
+      image.width = size.width * s;
+      image.height = size.height * s;
     }
     // the standard width/height of the image, with imageScale applied
     this.iw = image.width;
