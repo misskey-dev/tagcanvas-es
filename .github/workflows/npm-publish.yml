@@ -1,0 +1,38 @@
+name: Publish Node.js Package
+
+on:
+  release:
+    types: [created]
+
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    strategy:
+      matrix:
+        node-version: [24.18.0]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Update npm
+        run: |
+          npm install -g npm@latest
+      - name: Publish package
+        run: |
+          pnpm i --frozen-lockfile
+          pnpm build
+          pnpm publish --access public --no-git-checks --provenance
