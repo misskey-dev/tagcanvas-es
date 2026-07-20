@@ -1,7 +1,12 @@
 {
   "name": "@misskey-dev/tagcanvas-es",
   "version": "0.1.0",
+  "description": "HTML5 canvas-based tag cloud (Modernized ES module version of TagCanvas)",
+  "packageManager": "pnpm@10.14.0",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -9,17 +14,19 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": [
-    "dist"
-  ],
-  "description": "HTML5 canvas-based tag cloud (Modernized ES module version of TagCanvas)",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
     "typecheck": "tsc -p tsconfig.app.json --noEmit"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/misskey-dev/tagcanvas-es"
+  },
   "license": "LGPL-3.0-or-later",
-  "packageManager": "pnpm@10.14.0",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@types/node": "^26.1.1",
     "@typescript/typescript6": "^6.0.2",
