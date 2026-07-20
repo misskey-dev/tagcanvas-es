@@ -1,0 +1,30 @@
+{
+  "name": "@misskey-dev/tagcanvas-es",
+  "version": "2.11.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "description": "HTML5 canvas-based tag cloud (Modernized ES module version of TagCanvas)",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit"
+  },
+  "license": "LGPL-3.0-or-later",
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@typescript/typescript6": "^6.0.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vite-plugin-dts": "^5.0.3"
+  }
+}
