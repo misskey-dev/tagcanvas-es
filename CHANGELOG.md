@@ -1,6 +1,12 @@
 <!--
 ## 0.x.x (unreleased)
 -->
+## 0.1.1 / 2026/07/20
+
+Based version: 2.11.0
+
+- Fix: Exported file not recognized in some environments
+
 ## 0.1.0 / 2026/07/20
 
 Based version: 2.11.0
