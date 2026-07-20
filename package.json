@@ -1,6 +1,6 @@
 {
   "name": "@misskey-dev/tagcanvas-es",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "HTML5 canvas-based tag cloud (Modernized ES module version of TagCanvas)",
   "packageManager": "pnpm@11.15.1",
   "type": "module",

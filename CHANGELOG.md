@@ -1,7 +1,7 @@
 <!--
 ## 0.x.x (unreleased)
 -->
-## 0.1.2 (unreleased)
+## 0.1.2 / 2026/07/20
 
 Based version: 2.11.0
 
