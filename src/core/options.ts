@@ -1,6 +1,7 @@
 import type {
   AnimTiming,
   CenterFunc,
+  ColorOption,
   EasingFunction,
   ImageAlign,
   ImageMode,
@@ -55,7 +56,7 @@ export interface TagCanvasOptions {
   /** Brightness (0..1) of the nearest (largest) tags. */
   maxBrightness?: number;
   /** Outline color for the active tag. Also accepts `'tag'`/`'tagbg'` to reuse the tag's own colors. */
-  outlineColor?: string;
+  outlineColor?: ColorOption;
   /** Outline stroke thickness in pixels. */
   outlineThickness?: number;
   /** Outline offset from the tag's bounding box, in pixels. */
@@ -163,11 +164,11 @@ export interface TagCanvasOptions {
   /** Padding, in pixels, added around each tag's bounding box. */
   padding?: number;
   /** Tag background fill color, or `null` for none. Also accepts `'tag'`/`'tagbg'`. */
-  bgColor?: string | null;
+  bgColor?: ColorOption | null;
   /** Corner radius, in pixels, of the tag background. */
   bgRadius?: number;
   /** Tag background outline color, or `null` for none. Also accepts `'tag'`/`'tagbg'`. */
-  bgOutline?: string | null;
+  bgOutline?: ColorOption | null;
   /** Tag background outline thickness in pixels. */
   bgOutlineThickness?: number;
   /** Amount, in pixels, the active tag's outline grows by. */

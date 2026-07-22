@@ -1,3 +1,6 @@
+/** Same as a `string` type but allows autocompletion of literal values. */
+export type AnyString = string & {};
+
 /** Built-in 3D point-cloud arrangements a tag cloud can be laid out on. */
 export type TagShape = 'sphere' | 'hcylinder' | 'vcylinder' | 'hring' | 'vring';
 
@@ -14,6 +17,9 @@ export type TagShape = 'sphere' | 'hcylinder' | 'vcylinder' | 'hring' | 'vring';
 export type ShapePointGenerator = (
   count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ) => [number, number, number][];
+
+/** Color used for a tag's text, background, or outline. Can be a CSS color string, or the special values `'tag'` or `'tagbg'` to reuse the tag's own colors. */
+export type ColorOption = 'tag' | 'tagbg' | AnyString;
 
 /** Strategy used to draw a highlighted outline behind/around the active tag. */
 export type OutlineMethod = 'outline' | 'classic' | 'block' | 'color' | 'size' | 'none';

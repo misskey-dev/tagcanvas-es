@@ -3,7 +3,7 @@ import { easings } from '@/math/easings.js';
 import { getStyleProperty } from '@/platform/dom.js';
 import { createCanvas, get2dContext, roundRect } from '@/render/canvas.js';
 import type { CanvasImage } from '@/render/canvas.js';
-import type { CloudContext } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/cloud-context.js';
 
 /**
  * The subset of a `Tag` that {@link Outline} reads and mutates. `Tag`
@@ -107,7 +107,7 @@ export class Outline {
   /** Draw slot invoked once, after every tag is drawn (`classic`/`none` methods). */
   lastDraw: DrawSlot = () => false;
 
-  private readonly ctx: CloudContext;
+  private readonly ctx: ITagCanvas;
   /** Whether this outline pulsates (`pulsateTo < 1`). */
   private readonly pulsate: boolean;
   /** Marching-ants dash length (`~~outlineDash`). */
@@ -129,7 +129,7 @@ export class Outline {
   /** The geometry strategy selected by `setMethod`. */
   private drawFunc: DrawFunc = () => false;
 
-  constructor(ctx: CloudContext, tag: TagLike) {
+  constructor(ctx: ITagCanvas, tag: TagLike) {
     const opts = ctx.opts;
     this.ctx = ctx;
     this.tag = tag;

@@ -1,4 +1,4 @@
-import type { CloudContext } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/cloud-context.js';
 import type { ResolvedOptions, TagCanvasOptions } from '@/core/options.js';
 import { resolveOptions, fixFont } from '@/core/options.js';
 import type { AudioTrack } from '@/platform/audio.js';
@@ -57,8 +57,8 @@ interface FixedAnim {
 }
 
 /** An HTML5 canvas-based 3D tag cloud. */
-export class TagCanvas implements CloudContext {
-  // --- CloudContext / public surface ---
+export class TagCanvas implements ITagCanvas {
+  // --- ITagCanvas / public surface ---
 
   readonly canvas: HTMLCanvasElement;
   readonly ctxt: CanvasRenderingContext2D;

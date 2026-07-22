@@ -10,9 +10,9 @@ import type { ResolvedOptions } from '@/core/options.js';
  * concrete `TagCanvas` class.
  *
  * Members are `readonly` unless the field is genuinely mutated by a child
- * object (see {@link CloudContext.txtOptActive}).
+ * object (see {@link ITagCanvas.txtOptActive}).
  */
-export interface CloudContext {
+export interface ITagCanvas {
   /** All resolved, frozen static options for the cloud. Every option is read through here. */
   readonly opts: ResolvedOptions;
   /** The 2D rendering context of the cloud's canvas. */

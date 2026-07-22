@@ -15,7 +15,7 @@ import {
   scaleImage,
 } from '@/render/image.js';
 import { TextCanvas } from '@/render/text-canvas.js';
-import type { CloudContext } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/cloud-context.js';
 import { Outline } from '@/core/outline.js';
 import type { TagLike } from '@/core/outline.js';
 
@@ -107,7 +107,7 @@ export class Tag implements TagLike {
 
   // --- Internal state ---
 
-  private readonly ctx: CloudContext;
+  private readonly ctx: ITagCanvas;
   /** The tag's highlight outline. */
   private readonly outline: Outline;
   /** The rotation-transformed position from the last {@link Tag.calc}; also its return value. */
@@ -146,7 +146,7 @@ export class Tag implements TagLike {
   /** Whether the tag's own audio is currently playing. */
   private playing = false;
 
-  constructor(ctx: CloudContext, init: TagInit) {
+  constructor(ctx: ITagCanvas, init: TagInit) {
     const opts = ctx.opts;
     this.ctx = ctx;
     this.text = init.text;
@@ -300,7 +300,7 @@ export class Tag implements TagLike {
    * Measures the tag's text and, when `txtOpt` is on, pre-renders it (plus any
    * image and highlight variants) to bitmaps. Ported from `Measure`. The
    * legacy `t.txtOpt` write-back becomes a write to
-   * {@link CloudContext.txtOptActive}.
+   * {@link ITagCanvas.txtOptActive}.
    */
   private measure(): void {
     const ctx = this.ctx;
@@ -382,7 +382,7 @@ export class Tag implements TagLike {
    * Post-load image processing: scaling, rounding, shadow/background/outline
    * bitmap generation, then {@link Tag.init}. Ported from `AddImage`; waits
    * for the images to load via `addEventListener` (guarded by
-   * {@link CloudContext.destroyed}) instead of `AddHandler`.
+   * {@link ITagCanvas.destroyed}) instead of `AddHandler`.
    *
    * @param image - the cloned working image (already stored via {@link Tag.setImage}); the original `i`
    * @param source - the source `<img>` element the tag was built from; the original `o`

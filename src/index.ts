@@ -22,6 +22,7 @@ export type { TagCanvasOptions } from '@/core/options.js';
 export type {
   AnimTiming,
   CenterFunc,
+  ColorOption,
   EasingFunction,
   ImageAlign,
   ImageMode,
