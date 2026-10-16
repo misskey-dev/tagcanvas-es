@@ -1,4 +1,4 @@
-import type { ITagCanvas } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/tagcanvas-type.js';
 import type { ResolvedOptions, TagCanvasOptions } from '@/core/options.js';
 import { resolveOptions, fixFont } from '@/core/options.js';
 import type { AudioTrack } from '@/platform/audio.js';

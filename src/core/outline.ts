@@ -3,7 +3,7 @@ import { easings } from '@/math/easings.js';
 import { getStyleProperty } from '@/platform/dom.js';
 import { createCanvas, get2dContext, roundRect } from '@/render/canvas.js';
 import type { CanvasImage } from '@/render/canvas.js';
-import type { ITagCanvas } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/tagcanvas-type.js';
 
 /**
  * The subset of a `Tag` that {@link Outline} reads and mutates. `Tag`

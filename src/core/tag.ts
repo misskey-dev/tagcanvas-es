@@ -15,7 +15,7 @@ import {
 	scaleImage,
 } from '@/render/image.js';
 import { TextCanvas } from '@/render/text-canvas.js';
-import type { ITagCanvas } from '@/core/cloud-context.js';
+import type { ITagCanvas } from '@/core/tagcanvas-type.js';
 import { Outline } from '@/core/outline.js';
 import type { TagLike } from '@/core/outline.js';
 
