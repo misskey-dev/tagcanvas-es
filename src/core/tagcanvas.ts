@@ -147,7 +147,7 @@ export class TagCanvas implements ITagCanvas {
    */
 	constructor(canvas: HTMLCanvasElement | string, options?: TagCanvasOptions) {
 		const el = typeof canvas === 'string' ? document.querySelector(canvas) : canvas;
-		if (!el) {
+		if (typeof canvas === 'string' && !el) {
 			throw new Error(`TagCanvas: no element found for selector "${canvas}".`);
 		}
 		if (!(el instanceof HTMLCanvasElement)) {
@@ -192,7 +192,7 @@ export class TagCanvas implements ITagCanvas {
 
 		// Resolve the shape to runtime fields, never writing back to the frozen
 		// options.
-		this.#shapeFn = typeof opts.shape === 'function' ? opts.shape : shapes[opts.shape] ?? shapes.sphere;
+		this.#shapeFn = typeof opts.shape === 'function' ? opts.shape : (Object.hasOwn(shapes, opts.shape) ? shapes[opts.shape] : shapes.sphere);
 		this.#shapeExtraArgs = opts.shapeArgs;
 
 		// Reverse-compute repeatTags from minTags.
@@ -297,9 +297,7 @@ export class TagCanvas implements ITagCanvas {
 		}
 		this.#paused = false;
 		this.#time = performance.now();
-		if (this.#rafId === null) {
-			this.#rafId = requestAnimationFrame(this.#frame);
-		}
+		this.#rafId ??= requestAnimationFrame(this.#frame);
 	}
 
 	/** Rebuilds the whole tag list from the source markup (legacy `Reload` -> `Load`). */
@@ -430,9 +428,7 @@ export class TagCanvas implements ITagCanvas {
 
 	/** Resolves a weight-gradient color, lazily building the gradient cache. */
 	gradientColor(position: number, row: number): string {
-		if (!this.#gradientCache) {
-			this.#gradientCache = new GradientCache(this.opts.weightGradients);
-		}
+		this.#gradientCache ??= new GradientCache(this.opts.weightGradients);
 		return this.#gradientCache.colorAt(position, row);
 	}
 
@@ -492,7 +488,7 @@ export class TagCanvas implements ITagCanvas {
 			const imgs = e.getElementsByTagName('img');
 			if (imgs.length) {
 				source = imgs[0];
-				altEl = imgs[1] ?? null;
+				altEl = imgs.item(1);
 				cloned = new Image();
 				cloned.src = source.src;
 				if (!opts.imageMode) {
@@ -1009,9 +1005,7 @@ export class TagCanvas implements ITagCanvas {
 		}
 		const fa = this.#fixedAnim;
 		if (fa) {
-			if (!fa.transform) {
-				fa.transform = this.#transform;
-			}
+			fa.transform ??= this.#transform;
 			const t1 = performance.now() - fa.t0;
 			let angle = fa.angle;
 			const d = opts.easing(clamp(t1 / fa.t, 0, 1));

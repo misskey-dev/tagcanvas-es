@@ -410,7 +410,7 @@ export function resolveOptions(options?: TagCanvasOptions): ResolvedOptions {
 	Object.freeze(weightGradients);
 	Object.freeze(shapeArgs);
 	Object.freeze(shadowOffset);
-	initial === null || Object.freeze(initial);
+	if (initial !== null) Object.freeze(initial);
 	const truncatedScrollPause = merged.scrollPause === false ? 0 : Math.trunc(merged.scrollPause);
 	const scrollPauseMs = truncatedScrollPause > 0 ? truncatedScrollPause : 0;
 

@@ -145,7 +145,7 @@ export class Outline {
 		this.agap = Math.trunc(opts.outlineDashSpace) || this.adash;
 		this.aspeed = opts.outlineDashSpeed;
 		this.radius = opts.outlineRadius | 0;
-		this.draw = this.pulsate ? this.drawPulsate : this.drawSimple;
+		this.draw = this.pulsate ? this.drawPulsate.bind(this) : this.drawSimple.bind(this);
 		this.setMethod(opts.outlineMethod, opts.altImage);
 	}
 
@@ -158,19 +158,19 @@ export class Outline {
 	setMethod(om: OutlineMethod, alt: boolean): void {
 		switch (om) {
 			case 'block':
-				this.drawFunc = this.drawBlock;
+				this.drawFunc = this.drawBlock.bind(this);
 				this.preDraw = this.draw;
 				break;
 			case 'color':
-				this.drawFunc = this.drawColour;
+				this.drawFunc = this.drawColour.bind(this);
 				this.preDraw = this.draw;
 				break;
 			case 'classic':
-				this.drawFunc = this.drawOutline;
+				this.drawFunc = this.drawOutline.bind(this);
 				this.lastDraw = this.draw;
 				break;
 			case 'size':
-				this.drawFunc = this.drawSize;
+				this.drawFunc = this.drawSize.bind(this);
 				this.preDraw = this.draw;
 				break;
 			case 'none':
@@ -179,13 +179,13 @@ export class Outline {
 				break;
 			case 'outline':
 			default:
-				this.drawFunc = this.drawOutline;
+				this.drawFunc = this.drawOutline.bind(this);
 				this.postDraw = this.draw;
 				break;
 		}
 		if (alt) {
 			this.realPreDraw = this.preDraw;
-			this.preDraw = this.drawAlt;
+			this.preDraw = this.drawAlt.bind(this);
 		}
 	}
 
@@ -288,7 +288,7 @@ export class Outline {
 			} else {
 				sc = tag.oscale;
 			}
-			i = tag.fimage || tag.image;
+			i = tag.fimage ?? tag.image;
 			const m = 1 + ((sc - 1) * (1 - this.pulse));
 			tag.h *= m;
 			tag.w *= m;

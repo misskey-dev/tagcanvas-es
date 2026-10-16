@@ -372,7 +372,7 @@ export class Tag implements TagLike {
 			this.fimage = img;
 			twidth = this.fimage.width / s;
 			theight = this.fimage.height / s;
-			ctx.txtOptActive = this.fimage !== null;
+			ctx.txtOptActive = true;
 		}
 		this.h = theight;
 		this.w = twidth;
@@ -684,9 +684,7 @@ export class Tag implements TagLike {
 		// uses (and lazily creates) its own track instead.
 		let track = this.ctx.activeAudioTrack;
 		if (this.audioElement) {
-			if (!this.track) {
-				this.track = createTrack(this.audioElement);
-			}
+			this.track ??= createTrack(this.audioElement);
 			track = this.track;
 			if (track && !this.audioElement.paused) {
 				return true;
@@ -695,7 +693,7 @@ export class Tag implements TagLike {
 
 		if (track) {
 			if (ac.state === 'suspended') {
-				ac.resume();
+				void ac.resume();
 			}
 			if (ac.state === 'suspended') {
 				return false;
@@ -704,20 +702,17 @@ export class Tag implements TagLike {
 			track.gain.gain.value = Math.min(2, Math.max(0, this.ctx.audioVolume));
 			element.currentTime = 0;
 			this.stopped = false;
-			const p = element.play();
-			if (p !== undefined) {
-				p.then(() => {
-					if (this.stopped) {
-						// Pause the tag's own element if it has one (matches the original,
-						// which paused `this.audio`); the shared track is left for the next tag.
-						this.audioElement?.pause();
-					} else {
-						this.playing = true;
-					}
-				}).catch(() => {
-					// Autoplay may be rejected until the user interacts; ignore.
-				});
-			}
+			element.play().then(() => {
+				if (this.stopped) {
+					// Pause the tag's own element if it has one (matches the original,
+					// which paused `this.audio`); the shared track is left for the next tag.
+					this.audioElement?.pause();
+				} else {
+					this.playing = true;
+				}
+			}).catch(() => {
+				// Autoplay may be rejected until the user interacts; ignore.
+			});
 			return true;
 		}
 		return false;
