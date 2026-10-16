@@ -1,6 +1,13 @@
 <!--
 ## 0.x.x (unreleased)
 -->
+## 0.1.3 / 2026/10/16
+
+Based version: 2.11.0
+
+- Update dependencies
+- Fix: Wrong naming convention for TagCanvas interface type (`CloudContext` → `ITagCanvas`)
+
 ## 0.1.2 / 2026/07/20
 
 Based version: 2.11.0
