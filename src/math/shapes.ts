@@ -11,7 +11,7 @@ import type { ShapePointGenerator, TagShape } from '@/types.js';
  * falsy) all fall back to `0`.
  */
 function resolveMagic(magic: number | undefined): number {
-  return magic ? magic : 0;
+	return magic ? magic : 0;
 }
 
 /**
@@ -21,7 +21,7 @@ function resolveMagic(magic: number | undefined): number {
  * Ported from the original's `offset = isNaN(offset) ? 0 : offset * 1`.
  */
 function resolveOffset(offset: number | undefined): number {
-  return offset === undefined || Number.isNaN(offset) ? 0 : offset;
+	return offset === undefined || Number.isNaN(offset) ? 0 : offset;
 }
 
 /**
@@ -32,18 +32,18 @@ function resolveOffset(offset: number | undefined): number {
  * optional `magic` parameter (see {@link resolveMagic}).
  */
 function pointsOnSphere(
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ): [number, number, number][] {
-  const off = 2 / count;
-  const inc = Math.PI * (3 - Math.sqrt(5) + resolveMagic(args[0]));
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i < count; ++i) {
-    const y = i * off - 1 + off / 2;
-    const r = Math.sqrt(1 - y * y);
-    const phi = i * inc;
-    pts.push([Math.cos(phi) * r * radiusX, y * radiusY, Math.sin(phi) * r * radiusZ]);
-  }
-  return pts;
+	const off = 2 / count;
+	const inc = Math.PI * (3 - Math.sqrt(5) + resolveMagic(args[0]));
+	const pts: [number, number, number][] = [];
+	for (let i = 0; i < count; ++i) {
+		const y = i * off - 1 + off / 2;
+		const r = Math.sqrt(1 - y * y);
+		const phi = i * inc;
+		pts.push([Math.cos(phi) * r * radiusX, y * radiusY, Math.sin(phi) * r * radiusZ]);
+	}
+	return pts;
 }
 
 /**
@@ -56,20 +56,20 @@ function pointsOnSphere(
  * optional `magic` parameter (see {@link resolveMagic}).
  */
 function cylinder(
-  count: number, horizontal: boolean, radiusX: number, radiusY: number, radiusZ: number,
-  magic: number | undefined,
+	count: number, horizontal: boolean, radiusX: number, radiusY: number, radiusZ: number,
+	magic: number | undefined,
 ): [number, number, number][] {
-  const off = 2 / count;
-  const inc = Math.PI * (3 - Math.sqrt(5) + resolveMagic(magic));
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i < count; ++i) {
-    const j = i * off - 1 + off / 2;
-    const phi = i * inc;
-    const k = Math.cos(phi);
-    const l = Math.sin(phi);
-    pts.push(horizontal ? [j * radiusX, k * radiusY, l * radiusZ] : [k * radiusX, j * radiusY, l * radiusZ]);
-  }
-  return pts;
+	const off = 2 / count;
+	const inc = Math.PI * (3 - Math.sqrt(5) + resolveMagic(magic));
+	const pts: [number, number, number][] = [];
+	for (let i = 0; i < count; ++i) {
+		const j = i * off - 1 + off / 2;
+		const phi = i * inc;
+		const k = Math.cos(phi);
+		const l = Math.sin(phi);
+		pts.push(horizontal ? [j * radiusX, k * radiusY, l * radiusZ] : [k * radiusX, j * radiusY, l * radiusZ]);
+	}
+	return pts;
 }
 
 /**
@@ -81,22 +81,22 @@ function cylinder(
  * constant coordinate shared by every point on the ring.
  */
 function ring(
-  count: number, horizontal: boolean, radiusX: number, radiusY: number, radiusZ: number,
-  offset: number,
+	count: number, horizontal: boolean, radiusX: number, radiusY: number, radiusZ: number,
+	offset: number,
 ): [number, number, number][] {
-  const inc = (Math.PI * 2) / count;
-  const pts: [number, number, number][] = [];
-  for (let i = 0; i < count; ++i) {
-    const phi = i * inc;
-    const k = Math.cos(phi);
-    const l = Math.sin(phi);
-    pts.push(
-      horizontal
-        ? [offset * radiusX, k * radiusY, l * radiusZ]
-        : [k * radiusX, offset * radiusY, l * radiusZ],
-    );
-  }
-  return pts;
+	const inc = (Math.PI * 2) / count;
+	const pts: [number, number, number][] = [];
+	for (let i = 0; i < count; ++i) {
+		const phi = i * inc;
+		const k = Math.cos(phi);
+		const l = Math.sin(phi);
+		pts.push(
+			horizontal
+				? [offset * radiusX, k * radiusY, l * radiusZ]
+				: [k * radiusX, offset * radiusY, l * radiusZ],
+		);
+	}
+	return pts;
 }
 
 /**
@@ -104,9 +104,9 @@ function ring(
  * Ported from the original `PointsOnCylinderV`.
  */
 function pointsOnCylinderV(
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ): [number, number, number][] {
-  return cylinder(count, false, radiusX, radiusY, radiusZ, args[0]);
+	return cylinder(count, false, radiusX, radiusY, radiusZ, args[0]);
 }
 
 /**
@@ -114,9 +114,9 @@ function pointsOnCylinderV(
  * Ported from the original `PointsOnCylinderH`.
  */
 function pointsOnCylinderH(
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ): [number, number, number][] {
-  return cylinder(count, true, radiusX, radiusY, radiusZ, args[0]);
+	return cylinder(count, true, radiusX, radiusY, radiusZ, args[0]);
 }
 
 /**
@@ -126,9 +126,9 @@ function pointsOnCylinderH(
  * optional `offset` parameter (see {@link resolveOffset}).
  */
 function pointsOnRingV(
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ): [number, number, number][] {
-  return ring(count, false, radiusX, radiusY, radiusZ, resolveOffset(args[0]));
+	return ring(count, false, radiusX, radiusY, radiusZ, resolveOffset(args[0]));
 }
 
 /**
@@ -138,9 +138,9 @@ function pointsOnRingV(
  * optional `offset` parameter (see {@link resolveOffset}).
  */
 function pointsOnRingH(
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ): [number, number, number][] {
-  return ring(count, true, radiusX, radiusY, radiusZ, resolveOffset(args[0]));
+	return ring(count, true, radiusX, radiusY, radiusZ, resolveOffset(args[0]));
 }
 
 /**
@@ -151,9 +151,9 @@ function pointsOnRingH(
  * ...args)` the returned point order and coordinates match the original exactly.
  */
 export const shapes: Record<TagShape, ShapePointGenerator> = {
-  sphere: pointsOnSphere,
-  vcylinder: pointsOnCylinderV,
-  hcylinder: pointsOnCylinderH,
-  vring: pointsOnRingV,
-  hring: pointsOnRingH,
+	sphere: pointsOnSphere,
+	vcylinder: pointsOnCylinderV,
+	hcylinder: pointsOnCylinderH,
+	vring: pointsOnRingV,
+	hring: pointsOnRingH,
 };

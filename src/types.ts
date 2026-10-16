@@ -15,7 +15,7 @@ export type TagShape = 'sphere' | 'hcylinder' | 'vcylinder' | 'hring' | 'vring';
  * @returns an array of `[x, y, z]` points, one per tag
  */
 export type ShapePointGenerator = (
-  count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
+	count: number, radiusX: number, radiusY: number, radiusZ: number, ...args: number[]
 ) => [number, number, number][];
 
 /** Color used for a tag's text, background, or outline. Can be a CSS color string, or the special values `'tag'` or `'tagbg'` to reuse the tag's own colors. */
@@ -73,7 +73,7 @@ export type AnimTiming = 'smooth' | 'linear' | EasingFunction;
  * @param centerY - y coordinate of the cloud's center on the canvas
  */
 export type CenterFunc = (
-  ctx: CanvasRenderingContext2D, width: number, height: number, centerX: number, centerY: number
+	ctx: CanvasRenderingContext2D, width: number, height: number, centerX: number, centerY: number,
 ) => void;
 
 /** Maps weight thresholds to colors, used to interpolate a tag's weighted color. */
@@ -87,18 +87,18 @@ export type TagSelector = number | { index: number } | { id: string } | { text: 
 
 /** Options for animating the cloud's rotation so a chosen tag moves to a given position. */
 export interface RotateTagOptions {
-  /** Tag to rotate into place. */
-  tag: TagSelector;
-  /** Target latitude, in degrees. */
-  lat: number;
-  /** Target longitude, in degrees. */
-  lng: number;
-  /** Animation duration in milliseconds. Defaults to 500. */
-  time?: number;
-  /** Whether the tag should be shown in its active (highlighted) state while rotating. */
-  active?: boolean;
-  /** Invoked once the rotation animation completes. */
-  callback?: () => void;
+	/** Tag to rotate into place. */
+	tag: TagSelector;
+	/** Target latitude, in degrees. */
+	lat: number;
+	/** Target longitude, in degrees. */
+	lng: number;
+	/** Animation duration in milliseconds. Defaults to 500. */
+	time?: number;
+	/** Whether the tag should be shown in its active (highlighted) state while rotating. */
+	active?: boolean;
+	/** Invoked once the rotation animation completes. */
+	callback?: () => void;
 }
 
 /** Options for animating the cloud's rotation so a chosen tag moves to the front. */

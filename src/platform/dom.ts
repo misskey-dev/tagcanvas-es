@@ -9,7 +9,7 @@
  * @returns the computed value, or `''` if the property is not set
  */
 export function getStyleProperty(el: Element, prop: string): string {
-  return getComputedStyle(el).getPropertyValue(prop);
+	return getComputedStyle(el).getPropertyValue(prop);
 }
 
 /**
@@ -28,19 +28,19 @@ export function getStyleProperty(el: Element, prop: string): string {
  * @returns the tag's numeric weight (may be `NaN` if the underlying value can't be parsed, matching the original)
  */
 export function findWeight(el: HTMLElement, attr: string | null, textHeight: number): number {
-  let w = 1;
-  if (attr) {
-    const raw = el.getAttribute(attr);
-    w = Number(raw || textHeight);
-  } else {
-    const p = getStyleProperty(el, 'font-size');
-    if (p) {
-      w = (p.includes('px') && Number(p.replace('px', ''))) ||
+	let w = 1;
+	if (attr) {
+		const raw = el.getAttribute(attr);
+		w = Number(raw || textHeight);
+	} else {
+		const p = getStyleProperty(el, 'font-size');
+		if (p) {
+			w = (p.includes('px') && Number(p.replace('px', ''))) ||
         (p.includes('pt') && Number(p.replace('pt', '')) * 1.25) ||
         Number(p) * 3.3;
-    }
-  }
-  return w;
+		}
+	}
+	return w;
 }
 
 /**
@@ -52,14 +52,14 @@ export function findWeight(el: HTMLElement, attr: string | null, textHeight: num
  * @returns the element's top-left corner, in document coordinates
  */
 export function absPos(el: HTMLElement): { x: number; y: number } {
-  const r = el.getBoundingClientRect();
-  const dd = document.documentElement;
-  const b = document.body;
-  const xs = window.pageXOffset || dd.scrollLeft;
-  const ys = window.pageYOffset || dd.scrollTop;
-  const xo = dd.clientLeft || b.clientLeft;
-  const yo = dd.clientTop || b.clientTop;
-  return { x: r.left + xs - xo, y: r.top + ys - yo };
+	const r = el.getBoundingClientRect();
+	const dd = document.documentElement;
+	const b = document.body;
+	const xs = window.pageXOffset || dd.scrollLeft;
+	const ys = window.pageYOffset || dd.scrollTop;
+	const xo = dd.clientLeft || b.clientLeft;
+	const yo = dd.clientTop || b.clientTop;
+	return { x: r.left + xs - xo, y: r.top + ys - yo };
 }
 
 /**
@@ -76,11 +76,11 @@ export function absPos(el: HTMLElement): { x: number; y: number } {
  * @returns the position in the canvas's internal pixel space
  */
 export function canvasXY(e: MouseEvent | Touch, canvas: HTMLCanvasElement): { x: number; y: number } {
-  const rect = canvas.getBoundingClientRect();
-  return {
-    x: (e.clientX - rect.left) * (canvas.width / rect.width),
-    y: (e.clientY - rect.top) * (canvas.height / rect.height),
-  };
+	const rect = canvas.getBoundingClientRect();
+	return {
+		x: (e.clientX - rect.left) * (canvas.width / rect.width),
+		y: (e.clientY - rect.top) * (canvas.height / rect.height),
+	};
 }
 
 /**
@@ -91,17 +91,17 @@ export function canvasXY(e: MouseEvent | Touch, canvas: HTMLCanvasElement): { x:
  * has to be filtered out before the tag adopts it.
  */
 export function isImageBroken(img: HTMLImageElement): boolean {
-  return img.complete && img.naturalWidth === 0;
+	return img.complete && img.naturalWidth === 0;
 }
 
 /** Parses a computed CSS size into pixels, or `null` if it is not a definite length. */
 function cssLength(value: string): number | null {
-  if (!value.endsWith('px')) {
-    // `auto`, a percentage, or an empty string: not a resolvable length here.
-    return null;
-  }
-  const n = parseFloat(value);
-  return Number.isFinite(n) && n > 0 ? n : null;
+	if (!value.endsWith('px')) {
+		// `auto`, a percentage, or an empty string: not a resolvable length here.
+		return null;
+	}
+	const n = parseFloat(value);
+	return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 /**
@@ -121,28 +121,28 @@ function cssLength(value: string): number | null {
  * @returns the intended width/height in CSS pixels
  */
 export function resolveImageSize(img: HTMLImageElement): { width: number; height: number } {
-  if (img.getClientRects().length > 0) {
-    // Being rendered, so layout has already applied the CSS (including the
-    // aspect-ratio fill-in) and the IDL properties are authoritative.
-    return { width: img.width, height: img.height };
-  }
+	if (img.getClientRects().length > 0) {
+		// Being rendered, so layout has already applied the CSS (including the
+		// aspect-ratio fill-in) and the IDL properties are authoritative.
+		return { width: img.width, height: img.height };
+	}
 
-  const style = getComputedStyle(img);
-  const w = cssLength(style.width);
-  const h = cssLength(style.height);
-  const nw = img.naturalWidth;
-  const nh = img.naturalHeight;
+	const style = getComputedStyle(img);
+	const w = cssLength(style.width);
+	const h = cssLength(style.height);
+	const nw = img.naturalWidth;
+	const nh = img.naturalHeight;
 
-  if (w !== null && h !== null) {
-    return { width: w, height: h };
-  }
-  if (w !== null) {
-    return { width: w, height: nw > 0 ? (w * nh) / nw : w };
-  }
-  if (h !== null) {
-    return { width: nh > 0 ? (h * nw) / nh : h, height: h };
-  }
-  // No CSS sizing at all: fall back to the width/height attributes, or the
-  // intrinsic size when those are absent too.
-  return { width: img.width, height: img.height };
+	if (w !== null && h !== null) {
+		return { width: w, height: h };
+	}
+	if (w !== null) {
+		return { width: w, height: nw > 0 ? (w * nh) / nw : w };
+	}
+	if (h !== null) {
+		return { width: nh > 0 ? (h * nw) / nh : h, height: h };
+	}
+	// No CSS sizing at all: fall back to the width/height attributes, or the
+	// intrinsic size when those are absent too.
+	return { width: img.width, height: img.height };
 }

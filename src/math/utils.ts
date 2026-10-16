@@ -7,7 +7,7 @@ import type { Vector } from '@/math/vector.js';
  * `value` resolves to `max`, not to `min` or to `value` itself.
  */
 export function clamp(value: number, min: number, max: number): number {
-  return isNaN(value) ? max : Math.min(max, Math.max(min, value));
+	return isNaN(value) ? max : Math.min(max, Math.max(min, value));
 }
 
 /**
@@ -19,26 +19,26 @@ export function clamp(value: number, min: number, max: number): number {
  * here, making every permutation equally likely.
  */
 export function shuffle<T>(a: T[]): void {
-  let i = a.length - 1;
-  while (i) {
-    const p = Math.trunc(Math.random() * (i + 1));
-    const t = a[i];
-    a[i] = a[p];
-    a[p] = t;
-    --i;
-  }
+	let i = a.length - 1;
+	while (i) {
+		const p = Math.trunc(Math.random() * (i + 1));
+		const t = a[i];
+		a[i] = a[p];
+		a[p] = t;
+		--i;
+	}
 }
 
 /** Result of projecting a 3D point onto the 2D canvas plane. */
 export interface ProjectedPoint {
-  /** Projected X coordinate, relative to the cloud's center. */
-  x: number;
-  /** Projected Y coordinate, relative to the cloud's center. */
-  y: number;
-  /** Original (unprojected) Z coordinate, i.e. depth in camera space. */
-  z: number;
-  /** Perspective scale factor for content drawn at this point (e.g. a tag's image/text). */
-  w: number;
+	/** Projected X coordinate, relative to the cloud's center. */
+	x: number;
+	/** Projected Y coordinate, relative to the cloud's center. */
+	y: number;
+	/** Original (unprojected) Z coordinate, i.e. depth in camera space. */
+	z: number;
+	/** Perspective scale factor for content drawn at this point (e.g. a tag's image/text). */
+	w: number;
 }
 
 /**
@@ -59,18 +59,18 @@ export interface ProjectedPoint {
  * | `sy` | `stretchY` | the `stretchY` option |
  */
 export function project(
-  p: Vector,
-  radius: number,
-  z1: number,
-  z2: number,
-  stretchX: number,
-  stretchY: number,
+	p: Vector,
+	radius: number,
+	z1: number,
+	z2: number,
+	stretchX: number,
+	stretchY: number,
 ): ProjectedPoint {
-  const m = (radius * z1) / (z1 + z2 + p.z);
-  return {
-    x: p.x * m * stretchX,
-    y: p.y * m * stretchY,
-    z: p.z,
-    w: (z1 - p.z) / z2,
-  };
+	const m = (radius * z1) / (z1 + z2 + p.z);
+	return {
+		x: p.x * m * stretchX,
+		y: p.y * m * stretchY,
+		z: p.z,
+		w: (z1 - p.z) / z2,
+	};
 }
